@@ -2,4 +2,10 @@
     <string name="app_name">Fits</string>
     <string name="title">Title</string>
     <string name="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ut eros vehicula, commodo mauris eu, euismod risus. Fusce quis odio quis arcu maximus congue.</string>
+    <string name="home_motto">Empowering health through smart scans</string>
+    <string name="scan_now">Scan Now</string>
+    <string name="hi_fits_users">Hi, Fits Users!</string>
+    <string name="todays_picks">Today\'s picks</string>
+    <string name="see_all">See all</string>
+    <string name="scan_history">Scan history</string>
 </resources>
