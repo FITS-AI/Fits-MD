@@ -71,4 +71,7 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.room.runtime)
     ksp(libs.room.compiler)
+
+    // circle image
+    implementation (libs.circleimageview)
 }
