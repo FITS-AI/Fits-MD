@@ -13,6 +13,7 @@ constraintlayout = "2.2.0"
 converterGson = "2.9.0"
 datastorePreferences = "1.0.0"
 loggingInterceptor = "4.11.0"
+glide = "4.16.0"
 
 lifecycleLivedataKtx = "2.8.6"
 lifecycleViewmodelKtx = "2.8.6"
@@ -44,6 +45,7 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "converterGson" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

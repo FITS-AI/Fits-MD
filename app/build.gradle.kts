@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.logging.interceptor)
+    implementation(libs.glide)
 
     // data store and room
     implementation(libs.androidx.datastore.preferences)
