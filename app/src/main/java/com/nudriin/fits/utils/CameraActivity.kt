@@ -2,12 +2,9 @@ package com.nudriin.fits.utils
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import androidx.camera.core.Camera
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -16,9 +13,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraControl
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.CameraX
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
@@ -29,7 +24,6 @@ import androidx.core.view.WindowInsetsCompat
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -40,7 +34,7 @@ class CameraActivity : AppCompatActivity() {
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
     private var camera: Camera? = null
-    private var cameraFlashState = false
+    private var isFlashOn = false
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -55,9 +49,15 @@ class CameraActivity : AppCompatActivity() {
         }
 
         binding.flashCamera.setOnClickListener {
-            cameraFlashState = !cameraFlashState
+            isFlashOn = !isFlashOn
             if (camera?.cameraInfo?.hasFlashUnit() == true) {
-                camera?.cameraControl?.enableTorch(cameraFlashState)
+                camera?.cameraControl?.enableTorch(isFlashOn)
+            }
+
+            if(!isFlashOn) {
+                binding.flashCamera.setImageResource(R.drawable.ic_flash)
+            } else {
+                binding.flashCamera.setImageResource(R.drawable.ic_flash_disable)
             }
 
         }
