@@ -62,6 +62,8 @@ class CameraActivity : AppCompatActivity() {
 
         }
 
+        binding.backBtn.setOnClickListener { finish() }
+
         binding.captureImage.setOnClickListener {
             takePhoto()
         }
