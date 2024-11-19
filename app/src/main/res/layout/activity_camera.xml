@@ -19,8 +19,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <ImageView
         android:id="@+id/captureImage"
@@ -30,7 +29,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@drawable/ic_take_picture" />
+        app:srcCompat="@drawable/ic_scan" />
 
     <ImageView
         android:id="@+id/backBtn"
@@ -40,7 +39,7 @@
         android:layout_marginStart="16dp"
         app:layout_constraintStart_toStartOf="@+id/viewFinder"
         app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/ic_circle_alt_arrow_left" />
+        app:srcCompat="@drawable/ic_back" />
 
     <ImageView
         android:id="@+id/flashCamera"
