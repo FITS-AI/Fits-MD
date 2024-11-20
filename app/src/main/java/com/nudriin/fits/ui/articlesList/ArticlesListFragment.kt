@@ -1,4 +1,4 @@
-package com.nudriin.fits.ui
+package com.nudriin.fits.ui.articlesList
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
