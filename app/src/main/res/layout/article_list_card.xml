@@ -46,7 +46,7 @@
 
         <ImageView
             android:id="@+id/iv_article_home_thumbnail"
-            android:layout_width="140dp"
+            android:layout_width="145dp"
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             card_view:layout_constraintBottom_toBottomOf="parent"
