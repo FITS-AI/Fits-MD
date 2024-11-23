@@ -1,6 +1,7 @@
 package com.nudriin.fits.data.dto.user
 
 import com.google.gson.annotations.SerializedName
+import com.nudriin.fits.data.domain.User
 
 data class UserLoginResponse(
 
