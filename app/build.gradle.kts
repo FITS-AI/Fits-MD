@@ -88,4 +88,7 @@ dependencies {
     implementation(libs.play.services.tflite.gpu)
     implementation(libs.tensorflow.lite.task.vision.play.services)
     implementation(libs.tensorflow.lite.gpu)
+
+    // ml kit
+    implementation(libs.text.recognition)
 }
