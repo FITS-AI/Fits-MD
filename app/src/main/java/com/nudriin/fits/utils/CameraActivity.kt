@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
+import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,11 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import java.io.File
@@ -35,6 +42,7 @@ class CameraActivity : AppCompatActivity() {
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
     private var camera: Camera? = null
     private var isFlashOn = false
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,13 +56,17 @@ class CameraActivity : AppCompatActivity() {
             insets
         }
 
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
         binding.flashCamera.setOnClickListener {
             isFlashOn = !isFlashOn
             if (camera?.cameraInfo?.hasFlashUnit() == true) {
                 camera?.cameraControl?.enableTorch(isFlashOn)
             }
 
-            if(!isFlashOn) {
+            if (!isFlashOn) {
                 binding.flashCamera.setImageResource(R.drawable.ic_flash)
             } else {
                 binding.flashCamera.setImageResource(R.drawable.ic_flash_disable)
@@ -120,10 +132,32 @@ class CameraActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val intent = Intent()
-                    intent.putExtra(EXTRA_CAMERAX_IMAGE, output.savedUri.toString())
-                    setResult(CAMERAX_RESULT, intent)
-                    finish()
+                    binding.progressIndicator.visibility = View.VISIBLE
+//                    val intent = Intent()
+//                    intent.putExtra(EXTRA_CAMERAX_IMAGE, output.savedUri.toString())
+//                    setResult(CAMERAX_RESULT, intent)
+
+                    val textRecognizer =
+                        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                    val inputImage: InputImage =
+                        InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+
+                    textRecognizer.process(inputImage)
+                        .addOnSuccessListener { visionText: Text ->
+                            val detectedText: String = visionText.text
+                            if (detectedText.isNotBlank()) {
+                                binding.progressIndicator.visibility = View.GONE
+                                binding.tvGradeBottomSheet.text = "Grade: A"
+                                binding.tvOverallBottomSheet.text = detectedText
+                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+                            } else {
+                                binding.progressIndicator.visibility = View.GONE
+                            }
+                        }
+                        .addOnFailureListener {
+                            binding.progressIndicator.visibility = View.GONE
+                        }
+//                    finish()
                 }
 
                 override fun onError(exc: ImageCaptureException) {
@@ -150,6 +184,7 @@ class CameraActivity : AppCompatActivity() {
         }
         supportActionBar?.hide()
     }
+
     private val orientationEventListener by lazy {
         object : OrientationEventListener(this) {
             override fun onOrientationChanged(orientation: Int) {

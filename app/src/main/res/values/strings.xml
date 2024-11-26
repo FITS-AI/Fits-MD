@@ -13,4 +13,5 @@
     <string name="hint">Type something</string>
     <string name="product_details">Product details</string>
     <string name="overall">Overall</string>
+    <string name="health_analysis">Health Analysis</string>
 </resources>
