@@ -29,9 +29,9 @@ playServicesTfliteSupport = "16.3.0"
 roomCompiler = "2.5.2"
 roomRuntime = "2.5.2"
 tensorflowLiteGpu = "2.9.0"
-tensorflowLiteSupport = "0.1.0"
-tensorflowLiteMetadata = "0.1.0"
-tensorflowLiteTaskVisionPlayServices = "0.4.2"
+tensorflowLiteSupport = "0.4.4"
+tensorflowLiteMetadata = "0.4.4"
+tensorflowLiteTaskVisionPlayServices = "0.4.4"
 textRecognition = "16.0.1"
 
 [libraries]
