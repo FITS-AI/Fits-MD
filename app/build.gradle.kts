@@ -1,7 +1,7 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id ("androidx.navigation.safeargs")
+    id("androidx.navigation.safeargs")
     id("com.google.devtools.ksp")
 }
 
@@ -29,8 +29,9 @@ android {
         }
     }
 
-    buildFeatures{
+    buildFeatures {
         viewBinding = true
+        mlModelBinding = true
     }
 
     compileOptions {
@@ -49,6 +50,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.tensorflow.lite.support)
+    implementation(libs.tensorflow.lite.metadata)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -73,10 +76,19 @@ dependencies {
     ksp(libs.room.compiler)
 
     // circle image
-    implementation (libs.circleimageview)
+    implementation(libs.circleimageview)
 
     // camera
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    // tf lite
+    implementation(libs.play.services.tflite.support)
+    implementation(libs.play.services.tflite.gpu)
+    implementation(libs.tensorflow.lite.task.vision.play.services)
+    implementation(libs.tensorflow.lite.gpu)
+
+    // ml kit
+    implementation(libs.text.recognition)
 }
