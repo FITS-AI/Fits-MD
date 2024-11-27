@@ -1,7 +1,6 @@
-package com.nudriin.fits.utils
+package com.nudriin.fits.ui.camera
 
 import android.content.Context
-import android.content.Intent
 import androidx.camera.core.Camera
 import android.os.Build
 import android.os.Bundle
