@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
-import com.nudriin.fits.utils.CameraActivity
+import com.nudriin.fits.ui.camera.CameraActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
             this,
             REQUIRED_PERMISSION
         ) == PackageManager.PERMISSION_GRANTED
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
