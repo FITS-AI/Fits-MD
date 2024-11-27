@@ -43,6 +43,9 @@ class CameraActivity : AppCompatActivity() {
     private var camera: Camera? = null
     private var isFlashOn = false
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
+    private var snapState = 1
+    private lateinit var nutritionData: String
+    private lateinit var compositionData: String
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,26 +140,43 @@ class CameraActivity : AppCompatActivity() {
 //                    intent.putExtra(EXTRA_CAMERAX_IMAGE, output.savedUri.toString())
 //                    setResult(CAMERAX_RESULT, intent)
 
-                    val textRecognizer =
-                        TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-                    val inputImage: InputImage =
-                        InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
-
-                    textRecognizer.process(inputImage)
-                        .addOnSuccessListener { visionText: Text ->
-                            val detectedText: String = visionText.text
-                            if (detectedText.isNotBlank()) {
-                                binding.progressIndicator.visibility = View.GONE
-                                binding.tvGradeBottomSheet.text = "Grade: A"
-                                binding.tvOverallBottomSheet.text = detectedText
-                                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                            } else {
-                                binding.progressIndicator.visibility = View.GONE
-                            }
-                        }
-                        .addOnFailureListener {
+                    when (snapState) {
+                        1 -> {
+                            nutritionData = "Data Gizi Berhasil di ekstrak"
+                            snapState = 2
+                            binding.tvInstruction.text = "Ambil foto komposisi produk"
                             binding.progressIndicator.visibility = View.GONE
                         }
+
+                        2 -> {
+                            val textRecognizer =
+                                TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                            val inputImage: InputImage =
+                                InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+
+                            textRecognizer.process(inputImage)
+                                .addOnSuccessListener { visionText: Text ->
+                                    val detectedText: String = visionText.text
+                                    if (detectedText.isNotBlank()) {
+                                        binding.progressIndicator.visibility = View.GONE
+                                        compositionData = detectedText
+                                        binding.tvGradeBottomSheet.text =
+                                            "Nutritional: ${nutritionData}"
+                                        binding.tvOverallBottomSheet.text =
+                                            "Composition: ${compositionData}"
+                                        bottomSheetBehavior.state =
+                                            BottomSheetBehavior.STATE_EXPANDED
+                                    } else {
+                                        binding.progressIndicator.visibility = View.GONE
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    binding.progressIndicator.visibility = View.GONE
+                                }
+                        }
+                    }
+
+
 //                    finish()
                 }
 
