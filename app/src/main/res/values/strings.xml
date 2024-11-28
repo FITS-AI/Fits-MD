@@ -14,4 +14,7 @@
     <string name="product_details">Product details</string>
     <string name="overall">Overall</string>
     <string name="health_analysis">Health Analysis</string>
+    <string name="welcome_to_fits">Welcome to Fits!</string>
+    <string name="login">Login</string>
+    <string name="register">I\'m new, sign me up</string>
 </resources>

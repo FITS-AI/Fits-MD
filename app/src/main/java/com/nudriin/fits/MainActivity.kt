@@ -14,6 +14,7 @@ import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
 import com.nudriin.fits.ui.camera.CameraActivity
+import com.nudriin.fits.ui.welcome.WelcomeActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -42,6 +43,11 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+//        TODO("DELETE THIS")
+        val intent = Intent(this, WelcomeActivity::class.java)
+        startActivity(intent)
+
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
