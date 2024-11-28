@@ -91,4 +91,7 @@ dependencies {
 
     // ml kit
     implementation(libs.text.recognition)
+
+    // data store
+    implementation(libs.androidx.datastore.preferences)
 }
