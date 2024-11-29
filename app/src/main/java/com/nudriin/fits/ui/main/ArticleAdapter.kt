@@ -2,6 +2,7 @@ package com.nudriin.fits.ui.main
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.text.HtmlCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -9,7 +10,8 @@ import com.bumptech.glide.Glide
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.databinding.ArticleHomeCardBinding
 
-class ArticleAdapter : ListAdapter<ArticleItem, ArticleAdapter.ViewHolder>(DIFF_CALLBACK) {
+class ArticleAdapter(private val articleList: List<ArticleItem>) :
+    RecyclerView.Adapter<ArticleAdapter.ViewHolder>() {
 
     private lateinit var onItemClickCallback: OnItemClickCallback
 
@@ -19,8 +21,10 @@ class ArticleAdapter : ListAdapter<ArticleItem, ArticleAdapter.ViewHolder>(DIFF_
         return ViewHolder(binding)
     }
 
+    override fun getItemCount(): Int = articleList.size
+
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val article = getItem(position)
+        val article = articleList[position]
         holder.bind(article)
         holder.itemView.setOnClickListener {
             onItemClickCallback.onItemClicked(article.id)
@@ -35,24 +39,6 @@ class ArticleAdapter : ListAdapter<ArticleItem, ArticleAdapter.ViewHolder>(DIFF_
         fun onItemClicked(articleId: String)
     }
 
-    companion object {
-        val DIFF_CALLBACK = object : DiffUtil.ItemCallback<ArticleItem>() {
-            override fun areItemsTheSame(
-                oldItem: ArticleItem,
-                newItem: ArticleItem
-            ): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(
-                oldItem: ArticleItem,
-                newItem: ArticleItem
-            ): Boolean {
-                return oldItem == newItem
-            }
-        }
-    }
-
     class ViewHolder(private val binding: ArticleHomeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(article: ArticleItem) {
@@ -62,7 +48,12 @@ class ArticleAdapter : ListAdapter<ArticleItem, ArticleAdapter.ViewHolder>(DIFF_
                     .into(ivArticleHomeThumbnail)
 
                 tvArticleHomeTitle.text = article.title
-                tvArticleHomeDescription.text = article.content
+                
+                // TODO(Change this to load markdown)
+                tvArticleHomeDescription.text = HtmlCompat.fromHtml(
+                    article.content,
+                    HtmlCompat.FROM_HTML_MODE_COMPACT
+                )
             }
         }
 

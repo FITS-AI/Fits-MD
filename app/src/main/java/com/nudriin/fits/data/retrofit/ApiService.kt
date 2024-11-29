@@ -1,5 +1,6 @@
 package com.nudriin.fits.data.retrofit
 
+import com.nudriin.fits.data.dto.article.ArticleGetAllResponse
 import com.nudriin.fits.data.dto.user.UserGetByIdResponse
 import com.nudriin.fits.data.dto.user.UserLoginRequest
 import com.nudriin.fits.data.dto.user.UserLoginResponse
@@ -8,6 +9,8 @@ import com.nudriin.fits.data.dto.user.UserSaveResponse
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -20,4 +23,9 @@ interface ApiService {
 
     @GET("users/{id}")
     fun getUserById(@Path("id") id: String): Call<UserGetByIdResponse>
+
+    @GET("articles")
+    suspend fun getAllArticle(
+        @Header("Authorization") token: String
+    ): ArticleGetAllResponse
 }
