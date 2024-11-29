@@ -1,4 +1,10 @@
 package com.nudriin.fits.ui.login
 
-class LoginViewModel {
+import androidx.lifecycle.ViewModel
+import com.nudriin.fits.data.repository.AuthRepository
+
+class LoginViewModel(
+    private val authRepository: AuthRepository
+) : ViewModel() {
+
 }
