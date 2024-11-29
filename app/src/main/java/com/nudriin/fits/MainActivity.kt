@@ -13,13 +13,18 @@ import androidx.core.view.WindowInsetsCompat
 import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
+import androidx.activity.viewModels
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.welcome.WelcomeActivity
+import com.nudriin.fits.utils.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-
     private var currentImageUri: Uri? = null
+    private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -44,9 +49,14 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-//        TODO("DELETE THIS")
-        val intent = Intent(this, WelcomeActivity::class.java)
-        startActivity(intent)
+        authViewModel.getSession().observe(this) { session ->
+            if (session.token.isEmpty()) {
+                val intent = Intent(this, WelcomeActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

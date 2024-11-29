@@ -3,6 +3,7 @@ package com.nudriin.fits.utils
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.repository.AuthRepository
 import com.nudriin.fits.di.Injection
 import com.nudriin.fits.ui.login.LoginViewModel
@@ -15,6 +16,10 @@ class ViewModelFactory(
         return when {
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
                 LoginViewModel(authRepository) as T
+            }
+
+            modelClass.isAssignableFrom(AuthViewModel::class.java) -> {
+                AuthViewModel(authRepository) as T
             }
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
