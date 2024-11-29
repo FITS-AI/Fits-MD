@@ -1,10 +1,8 @@
-package com.nudriin.fits.ui.main
+package com.nudriin.fits.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.text.HtmlCompat
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.nudriin.fits.data.dto.article.ArticleItem
@@ -48,7 +46,7 @@ class ArticleAdapter(private val articleList: List<ArticleItem>) :
                     .into(ivArticleHomeThumbnail)
 
                 tvArticleHomeTitle.text = article.title
-                
+
                 // TODO(Change this to load markdown)
                 tvArticleHomeDescription.text = HtmlCompat.fromHtml(
                     article.content,

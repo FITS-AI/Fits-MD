@@ -15,6 +15,7 @@ import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.ui.camera.CameraActivity
