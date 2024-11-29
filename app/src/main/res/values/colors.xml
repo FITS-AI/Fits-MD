@@ -9,4 +9,12 @@
     <color name="label_b">#86BC26</color>
     <color name="label_c">#F7A832</color>
     <color name="label_d">#BC1717</color>
+    <color name="input_outline">
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:color="@color/lime" android:state_focused="true" />
+            <item android:color="@color/lime" android:state_hovered="true" />
+            <item android:color="@color/lime" android:state_enabled="false" />
+            <item android:color="@color/white" />
+        </selector>
+    </color>
 </resources>

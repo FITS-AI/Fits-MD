@@ -17,4 +17,6 @@
     <string name="welcome_to_fits">Welcome to Fits!</string>
     <string name="login">Login</string>
     <string name="register">I\'m new, sign me up</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
 </resources>

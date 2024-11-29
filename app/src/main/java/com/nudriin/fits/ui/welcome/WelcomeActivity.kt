@@ -15,6 +15,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityWelcomeBinding
+import com.nudriin.fits.ui.login.LoginActivity
 
 class WelcomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWelcomeBinding
@@ -44,8 +45,7 @@ class WelcomeActivity : AppCompatActivity() {
 
     private fun setupAction() {
         binding.btnLogin.setOnClickListener {
-//            startActivity(Intent(this, LoginActivity::class.java))
-            TODO("CREATE INTENT TO LOGIN")
+            startActivity(Intent(this, LoginActivity::class.java))
         }
 
         binding.btnRegister.setOnClickListener {
