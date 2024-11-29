@@ -15,8 +15,22 @@ data class UserLoginResponse(
     val accessToken: String,
 
     @field:SerializedName("user")
-    val user: User,
+    val user: UserLogin,
 
     @field:SerializedName("refreshToken")
     val refreshToken: String
+)
+
+data class UserLogin(
+    @field:SerializedName("id")
+    val id: String,
+
+    @field:SerializedName("name")
+    val name: String,
+
+    @field:SerializedName("email")
+    val email: String,
+
+    @field:SerializedName("created_at")
+    val createdAt: String,
 )

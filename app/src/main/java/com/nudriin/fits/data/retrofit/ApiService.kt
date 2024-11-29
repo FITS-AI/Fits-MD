@@ -16,7 +16,7 @@ interface ApiService {
     fun saveUser(@Body userSaveRequest: UserSaveRequest): Call<UserSaveResponse>
 
     @POST("users/login")
-    fun login(@Body loginRequest: UserLoginRequest): Call<UserLoginResponse>
+    suspend fun login(@Body loginRequest: UserLoginRequest): UserLoginResponse
 
     @GET("users/{id}")
     fun getUserById(@Path("id") id: String): Call<UserGetByIdResponse>
