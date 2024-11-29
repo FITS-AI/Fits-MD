@@ -1,5 +1,6 @@
 package com.nudriin.fits.data.retrofit
 
+import com.nudriin.fits.BuildConfig
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -16,7 +17,7 @@ class ApiConfig {
                 .build()
 
             val retrofit = Retrofit.Builder()
-                .baseUrl("https://event-api.dicoding.dev/")
+                .baseUrl(BuildConfig.API_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build()

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -19,7 +21,13 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val properties = Properties()
+    properties.load(project.rootProject.file("local.properties").reader())
+
     buildTypes {
+        debug {
+            buildConfigField("String", "API_URL", properties.getProperty("API_URL"))
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -32,6 +40,7 @@ android {
     buildFeatures {
         viewBinding = true
         mlModelBinding = true
+        buildConfig = true
     }
 
     compileOptions {
