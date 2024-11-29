@@ -1,4 +1,4 @@
-package com.nudriin.fits
+package com.nudriin.fits.ui.main
 
 import android.content.pm.PackageManager
 import android.net.Uri

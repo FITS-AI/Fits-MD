@@ -7,18 +7,14 @@ import android.util.Log
 import android.util.Patterns
 import android.view.WindowInsets
 import android.view.WindowManager
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.widget.addTextChangedListener
-import com.nudriin.fits.MainActivity
+import com.nudriin.fits.ui.main.MainActivity
 import com.nudriin.fits.R
 import com.nudriin.fits.data.dto.user.UserLoginRequest
 import com.nudriin.fits.data.pref.UserModel
 import com.nudriin.fits.databinding.ActivityLoginBinding
-import com.nudriin.fits.databinding.ActivityWelcomeBinding
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 
