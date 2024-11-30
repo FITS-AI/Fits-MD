@@ -61,13 +61,16 @@ class HomeFragment : Fragment() {
         homeViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
+                    showLoading(true)
                 }
 
                 is Result.Success -> {
+                    showLoading(false)
                     setArticleList(result.data.article)
                 }
 
                 is Result.Error -> {
+                    showLoading(false)
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
@@ -136,6 +139,14 @@ class HomeFragment : Fragment() {
     private fun startCameraX() {
         val intent = Intent(requireActivity(), CameraActivity::class.java)
         startActivity(intent)
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.GONE
+        }
     }
 
 }
