@@ -10,6 +10,7 @@ import com.nudriin.fits.di.Injection
 import com.nudriin.fits.ui.home.HomeViewModel
 import com.nudriin.fits.ui.login.LoginViewModel
 import com.nudriin.fits.ui.main.MainViewModel
+import com.nudriin.fits.ui.register.RegisterViewModel
 
 class ViewModelFactory(
     private val authRepository: AuthRepository,
@@ -32,6 +33,10 @@ class ViewModelFactory(
 
             modelClass.isAssignableFrom(HomeViewModel::class.java) -> {
                 HomeViewModel(articleRepository) as T
+            }
+
+            modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
+                RegisterViewModel(authRepository) as T
             }
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
