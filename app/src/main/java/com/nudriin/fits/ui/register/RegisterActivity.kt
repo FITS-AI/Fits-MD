@@ -24,6 +24,7 @@ import com.nudriin.fits.ui.login.LoginActivity
 import com.nudriin.fits.ui.main.MainActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
+import com.nudriin.fits.utils.showToast
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
@@ -92,6 +93,9 @@ class RegisterActivity : AppCompatActivity() {
 
                         is Result.Error -> {
                             binding.btnRegister.isEnabled = true
+                            result.error.getContentIfNotHandled().let { toastText ->
+                                showToast(this, toastText.toString())
+                            }
                         }
                     }
                 }

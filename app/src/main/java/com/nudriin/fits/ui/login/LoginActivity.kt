@@ -20,6 +20,7 @@ import com.nudriin.fits.databinding.ActivityLoginBinding
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
+import com.nudriin.fits.utils.showToast
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -88,6 +89,9 @@ class LoginActivity : AppCompatActivity() {
 
                         is Result.Error -> {
                             binding.btnLogin.isEnabled = true
+                            result.error.getContentIfNotHandled().let { toastText ->
+                                showToast(this, toastText.toString())
+                            }
                         }
                     }
                 }
