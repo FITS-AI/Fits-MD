@@ -71,7 +71,7 @@ class ArticlesListFragment : Fragment() {
         val adapter = ArticleListAdapter(articleList)
         binding.rvArticleList.adapter = adapter
         adapter.setOnItemClickCallback(object : ArticleListAdapter.OnItemClickCallback {
-            override fun onItemClicked(articleId: String) {
+            override fun onItemClicked(articleId: Int) {
                 TODO("Not yet implemented")
             }
 

@@ -25,7 +25,14 @@ class ArticleAdapter(private val articleList: List<ArticleItem>) :
         val article = articleList[position]
         holder.bind(article)
         holder.itemView.setOnClickListener {
-            onItemClickCallback.onItemClicked(article.id)
+            onItemClickCallback.onItemClicked(
+                articleId = article.id,
+                title = article.title,
+                author = article.author,
+                content = article.content,
+                imgUrl = article.imgUrl,
+                date = article.createdAt
+            )
         }
     }
 
@@ -34,7 +41,14 @@ class ArticleAdapter(private val articleList: List<ArticleItem>) :
     }
 
     interface OnItemClickCallback {
-        fun onItemClicked(articleId: String)
+        fun onItemClicked(
+            articleId: Int,
+            title: String,
+            author: String,
+            content: String,
+            imgUrl: String,
+            date: String
+        )
     }
 
     class ViewHolder(private val binding: ArticleHomeCardBinding) :

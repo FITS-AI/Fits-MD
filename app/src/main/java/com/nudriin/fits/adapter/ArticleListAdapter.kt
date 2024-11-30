@@ -34,7 +34,7 @@ class ArticleListAdapter(private val articleList: List<ArticleItem>) :
     }
 
     interface OnItemClickCallback {
-        fun onItemClicked(articleId: String)
+        fun onItemClicked(articleId: Int)
     }
 
     class ViewHolder(private val binding: ArticleListCardBinding) :

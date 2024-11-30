@@ -81,8 +81,15 @@ class HomeFragment : Fragment() {
         val adapter = ArticleAdapter(articles)
         binding.rvHomeArticle.adapter = adapter
         adapter.setOnItemClickCallback(object : ArticleAdapter.OnItemClickCallback {
-            override fun onItemClicked(articleId: String) {
-                TODO("Not yet implemented")
+            override fun onItemClicked(
+                articleId: Int,
+                title: String,
+                author: String,
+                content: String,
+                imgUrl: String,
+                date: String
+            ) {
+                moveToArticleDetail(articleId, title, author, content, imgUrl, date)
             }
 
         })
@@ -91,6 +98,20 @@ class HomeFragment : Fragment() {
     private fun moveToArticleList() {
         val toArticleList = HomeFragmentDirections.actionHomeFragmentToArticlesListFragment()
         Navigation.findNavController(binding.root).navigate(toArticleList)
+    }
+
+    private fun moveToArticleDetail(
+        articleId: Int,
+        title: String,
+        author: String,
+        content: String,
+        imgUrl: String,
+        date: String
+    ) {
+        val toArticleDetail = HomeFragmentDirections.actionHomeFragmentToArticleDetailFragment(
+            articleId, title, author, content, imgUrl, date
+        )
+        Navigation.findNavController(binding.root).navigate(toArticleDetail)
     }
 
     private fun startCameraX() {

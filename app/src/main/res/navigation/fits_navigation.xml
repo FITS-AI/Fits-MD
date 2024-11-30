@@ -36,7 +36,27 @@
         android:id="@+id/articleDetailFragment"
         android:name="com.nudriin.fits.ui.articleDetail.ArticleDetailFragment"
         android:label="fragment_article_detail"
-        tools:layout="@layout/fragment_article_detail" />
+        tools:layout="@layout/fragment_article_detail">
+
+        <argument
+            android:name="articleId"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="author"
+            app:argType="string" />
+        <argument
+            android:name="content"
+            app:argType="string" />
+        <argument
+            android:name="img_url"
+            app:argType="string" />
+        <argument
+            android:name="date"
+            app:argType="string" />
+    </fragment>
     <fragment
         android:id="@+id/scanHistoryFragment"
         android:name="com.nudriin.fits.ui.scanHistory.ScanHistoryFragment"
