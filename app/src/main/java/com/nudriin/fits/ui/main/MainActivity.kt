@@ -62,16 +62,7 @@ class MainActivity : AppCompatActivity() {
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
-
-        val fragmentManager = supportFragmentManager
-        val homeFragment = HomeFragment()
-        val fragment = fragmentManager.findFragmentByTag(HomeFragment::class.java.simpleName)
-        if (fragment !is HomeFragment) {
-            fragmentManager
-                .beginTransaction()
-                .add(R.id.main, homeFragment, HomeFragment::class.java.simpleName)
-                .commit()
-        }
+        
     }
 
     private fun showToast(message: String) {
