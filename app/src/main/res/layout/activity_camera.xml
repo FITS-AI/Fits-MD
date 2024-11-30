@@ -85,60 +85,66 @@
         android:id="@+id/bottomSheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:background="@drawable/dark_bg_top_rounded"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp">
 
-        <LinearLayout
-            android:orientation="vertical"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp">
+            android:fillViewport="true">
 
-            <View
-                android:layout_width="80dp"
-                android:layout_height="5dp"
-                android:layout_gravity="center_horizontal"
-                android:background="@drawable/drag_handle_bg"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:id="@+id/text_result_title"
+            <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="@font/plus_jakarta_sans_bold"
-                android:textColor="@color/ash"
-                android:text="@string/health_analysis"
-                android:textAppearance="?attr/textAppearanceHeadline6"
-                android:gravity="center"
-                android:paddingBottom="8dp" />
+                android:padding="16dp">
 
-            <TextView
-                android:id="@+id/tv_grade_bottom_sheet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/plus_jakarta_sans"
-                android:textColor="@color/ash"
-                tools:text="Grade: A" />
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="5dp"
+                    android:layout_gravity="center_horizontal"
+                    android:background="@drawable/drag_handle_bg"
+                    android:layout_marginBottom="8dp" />
 
-            <TextView
-                android:id="@+id/tv_overall_bottom_sheet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/plus_jakarta_sans"
-                android:textColor="@color/ash"
-                tools:text="Overall" />
+                <TextView
+                    android:id="@+id/text_result_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/plus_jakarta_sans_bold"
+                    android:textColor="@color/ash"
+                    android:text="@string/health_analysis"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:gravity="center"
+                    android:paddingBottom="8dp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_analysis_result"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                tools:listitem="@layout/analysis_result_card" />
+                <TextView
+                    android:id="@+id/tv_grade_bottom_sheet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/plus_jakarta_sans"
+                    android:textColor="@color/ash"
+                    tools:text="Grade: A" />
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/tv_overall_bottom_sheet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/plus_jakarta_sans"
+                    android:textColor="@color/ash"
+                    tools:text="Overall" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_analysis_result"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    tools:listitem="@layout/analysis_result_card" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
     </FrameLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
