@@ -83,6 +83,10 @@ class HomeFragment : Fragment() {
         binding.tvSeeAllArticle.setOnClickListener {
             moveToArticleList()
         }
+
+        binding.ivHomeProfile.setOnClickListener {
+            moveToProfile()
+        }
     }
 
     private fun setArticleList(articleList: List<ArticleItem>) {
@@ -121,6 +125,11 @@ class HomeFragment : Fragment() {
             articleId, title, author, content, imgUrl, date
         )
         Navigation.findNavController(binding.root).navigate(toArticleDetail)
+    }
+
+    private fun moveToProfile() {
+        val toProfile = HomeFragmentDirections.actionHomeFragmentToProfileFragment()
+        Navigation.findNavController(binding.root).navigate(toProfile)
     }
 
     private fun startCameraX() {
