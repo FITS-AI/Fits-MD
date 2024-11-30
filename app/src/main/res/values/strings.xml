@@ -30,4 +30,6 @@
     <string name="register_btn">Register</string>
     <string name="name">Name</string>
     <string name="name_error_empty">Name is required</string>
+    <string name="on_boarding_title">Know What You Eat, Protect Your Health!</string>
+    <string name="on_boarding_message">Fits arrives as your companion in your health journey. We help you uncover the secrets behind every food and drink product you consume. With cutting-edge technology, we provide deep insights into composition, nutritional content, and potential health risks.</string>
 </resources>
