@@ -29,6 +29,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
+import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -112,11 +113,7 @@ class CameraActivity : AppCompatActivity() {
                     this, cameraSelector, preview, imageCapture
                 )
             } catch (exc: Exception) {
-                Toast.makeText(
-                    this@CameraActivity,
-                    "Gagal memunculkan kamera.",
-                    Toast.LENGTH_SHORT
-                ).show()
+                showToast(this, "Gagal memunculkan kamera.")
                 Log.e(TAG, "startCamera: ${exc.message}")
             }
         }, ContextCompat.getMainExecutor(this))
@@ -180,11 +177,7 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exc: ImageCaptureException) {
-                    Toast.makeText(
-                        this@CameraActivity,
-                        "Gagal mengambil gambar.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showToast(this@CameraActivity, "Gagal mengambil gambar.")
                     Log.e(TAG, "onError: ${exc.message}")
                 }
             }

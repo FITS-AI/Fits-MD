@@ -22,6 +22,7 @@ import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
+import com.nudriin.fits.utils.showToast
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -68,7 +69,7 @@ class HomeFragment : Fragment() {
 
                 is Result.Error -> {
                     result.error.getContentIfNotHandled().let { toastText ->
-                        showToast(toastText.toString())
+                        showToast(requireContext(), toastText.toString())
                     }
                 }
             }
@@ -136,10 +137,5 @@ class HomeFragment : Fragment() {
         val intent = Intent(requireActivity(), CameraActivity::class.java)
         startActivity(intent)
     }
-
-    private fun showToast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-    }
-
 
 }
