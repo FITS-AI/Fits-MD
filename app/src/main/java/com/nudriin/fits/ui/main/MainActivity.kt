@@ -15,6 +15,7 @@ import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
 import androidx.fragment.app.add
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.R
 import com.nudriin.fits.adapter.ArticleAdapter
@@ -29,6 +30,11 @@ import com.nudriin.fits.utils.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
+
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -59,10 +65,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        authViewModel.getSession().observe(this) { session ->
+            if (session.token.isEmpty()) {
+                val intent = Intent(this, WelcomeActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
+        }
+
         if (!allPermissionsGranted()) {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
-        
+
     }
 
     private fun showToast(message: String) {

@@ -10,15 +10,22 @@ import android.view.View
 import android.view.WindowInsets
 import android.view.WindowManager
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.nudriin.fits.R
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.databinding.ActivityWelcomeBinding
 import com.nudriin.fits.ui.login.LoginActivity
+import com.nudriin.fits.ui.main.MainActivity
+import com.nudriin.fits.utils.ViewModelFactory
 
 class WelcomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityWelcomeBinding
+    private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +48,15 @@ class WelcomeActivity : AppCompatActivity() {
             )
         }
         supportActionBar?.hide()
+
+        authViewModel.getSession().observe(this) { session ->
+            if (session.token.isNotEmpty()) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
+        }
     }
 
     private fun setupAction() {

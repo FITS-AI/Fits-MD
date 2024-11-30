@@ -25,9 +25,6 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private var currentImageUri: Uri? = null
-    private val authViewModel: AuthViewModel by viewModels {
-        ViewModelFactory.getInstance(requireContext())
-    }
     private val homeViewModel: HomeViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
@@ -50,14 +47,6 @@ class HomeFragment : Fragment() {
     private fun setupView() {
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.rvHomeArticle.layoutManager = layoutManager
-        authViewModel.getSession().observe(viewLifecycleOwner) { session ->
-            if (session.token.isEmpty()) {
-                val intent = Intent(requireActivity(), WelcomeActivity::class.java)
-                intent.flags =
-                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
-                startActivity(intent)
-            }
-        }
 
         homeViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
