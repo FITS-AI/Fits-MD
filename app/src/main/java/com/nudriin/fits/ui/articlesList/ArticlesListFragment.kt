@@ -7,11 +7,13 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ArticleListAdapter
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.databinding.FragmentArticlesListBinding
+import com.nudriin.fits.ui.home.HomeFragmentDirections
 import com.nudriin.fits.ui.main.MainViewModel
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -71,11 +73,32 @@ class ArticlesListFragment : Fragment() {
         val adapter = ArticleListAdapter(articleList)
         binding.rvArticleList.adapter = adapter
         adapter.setOnItemClickCallback(object : ArticleListAdapter.OnItemClickCallback {
-            override fun onItemClicked(articleId: Int) {
-                TODO("Not yet implemented")
+            override fun onItemClicked(
+                articleId: Int,
+                title: String,
+                author: String,
+                content: String,
+                imgUrl: String,
+                date: String
+            ) {
+                moveToArticleDetail(articleId, title, author, content, imgUrl, date)
             }
-
         })
+    }
+
+    private fun moveToArticleDetail(
+        articleId: Int,
+        title: String,
+        author: String,
+        content: String,
+        imgUrl: String,
+        date: String
+    ) {
+        val toArticleDetail =
+            ArticlesListFragmentDirections.actionArticlesListFragmentToArticleDetailFragment(
+                articleId, title, author, content, imgUrl, date
+            )
+        Navigation.findNavController(binding.root).navigate(toArticleDetail)
     }
 
     private fun showToast(message: String) {
