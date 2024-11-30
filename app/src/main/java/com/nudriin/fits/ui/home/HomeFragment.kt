@@ -9,6 +9,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
@@ -81,7 +83,7 @@ class HomeFragment : Fragment() {
         }
 
         binding.tvSeeAllArticle.setOnClickListener {
-
+            moveToArticleList()
         }
     }
 
@@ -95,6 +97,11 @@ class HomeFragment : Fragment() {
             }
 
         })
+    }
+
+    private fun moveToArticleList() {
+        val toArticleList = HomeFragmentDirections.actionHomeFragmentToArticlesListFragment()
+        Navigation.findNavController(binding.root).navigate(toArticleList)
     }
 
     private fun startCameraX() {
