@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ArticleListAdapter
 import com.nudriin.fits.data.dto.article.ArticleItem
@@ -34,6 +35,7 @@ class ArticlesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
+        setupAction()
     }
 
     private fun setupView() {
@@ -43,6 +45,7 @@ class ArticlesListFragment : Fragment() {
         mainViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
+//                    TODO("Create Loading")
                 }
 
                 is Result.Success -> {
@@ -56,7 +59,12 @@ class ArticlesListFragment : Fragment() {
                 }
             }
         }
+    }
 
+    private fun setupAction() {
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
     }
 
     private fun setArticleList(articleList: List<ArticleItem>) {
