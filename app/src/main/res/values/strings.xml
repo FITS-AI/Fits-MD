@@ -8,7 +8,6 @@
     <string name="todays_picks">Today\'s picks</string>
     <string name="see_all">See all</string>
     <string name="scan_history">Scan history</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="hint">Type something</string>
     <string name="product_details">Product details</string>
@@ -28,4 +27,7 @@
     <string name="health_preferences_desc">Choose what information about food matters most to you.</string>
     <string name="app_settings">App Settings</string>
     <string name="set_your_app_preferences">Set your app preferences</string>
+    <string name="register_btn">Register</string>
+    <string name="name">Name</string>
+    <string name="name_error_empty">Name is required</string>
 </resources>

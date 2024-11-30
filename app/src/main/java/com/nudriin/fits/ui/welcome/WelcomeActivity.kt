@@ -19,6 +19,7 @@ import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.databinding.ActivityWelcomeBinding
 import com.nudriin.fits.ui.login.LoginActivity
 import com.nudriin.fits.ui.main.MainActivity
+import com.nudriin.fits.ui.register.RegisterActivity
 import com.nudriin.fits.utils.ViewModelFactory
 
 class WelcomeActivity : AppCompatActivity() {
@@ -65,8 +66,7 @@ class WelcomeActivity : AppCompatActivity() {
         }
 
         binding.btnRegister.setOnClickListener {
-//            startActivity(Intent(this, SignupActivity::class.java))
-            TODO("CREATE INTENT TO REGISTER")
+            startActivity(Intent(this, RegisterActivity::class.java))
         }
     }
 
