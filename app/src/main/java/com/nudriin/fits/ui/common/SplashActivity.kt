@@ -7,21 +7,42 @@ import android.os.Handler
 import android.os.Looper
 import android.view.WindowInsets
 import android.view.WindowManager
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.viewModels
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.databinding.ActivitySplashBinding
 import com.nudriin.fits.ui.main.MainActivity
+import com.nudriin.fits.ui.welcome.WelcomeActivity
+import com.nudriin.fits.utils.ViewModelFactory
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySplashBinding
+    private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setupView()
         Handler(Looper.getMainLooper()).postDelayed({
-            val splashIntent = Intent(this, MainActivity::class.java)
-            startActivity(splashIntent)
-            finish()
+            authViewModel.getSession().observe(this) { session ->
+                if (session.token.isEmpty()) {
+                    val intent = Intent(this, WelcomeActivity::class.java)
+                    intent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(intent)
+                    finish()
+                } else {
+                    val splashIntent = Intent(this, MainActivity::class.java)
+                    splashIntent.flags =
+                        Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(splashIntent)
+                    finish()
+                }
+            }
         }, 2500)
     }
 
