@@ -47,14 +47,16 @@ class ArticlesListFragment : Fragment() {
         mainViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
-//                    TODO("Create Loading")
+                    showLoading(true)
                 }
 
                 is Result.Success -> {
+                    showLoading(false)
                     setArticleList(result.data.article)
                 }
 
                 is Result.Error -> {
+                    showLoading(false)
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
@@ -99,6 +101,14 @@ class ArticlesListFragment : Fragment() {
                 articleId, title, author, content, imgUrl, date
             )
         Navigation.findNavController(binding.root).navigate(toArticleDetail)
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.GONE
+        }
     }
 
 }
