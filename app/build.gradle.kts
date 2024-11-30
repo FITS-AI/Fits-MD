@@ -103,4 +103,8 @@ dependencies {
 
     // data store
     implementation(libs.androidx.datastore.preferences)
+
+    // navigation
+    implementation(libs.androidx.navigation.fragment.ktx.v284)
+    implementation(libs.androidx.navigation.ui.ktx.v284)
 }
