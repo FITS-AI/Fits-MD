@@ -28,4 +28,6 @@
     <string name="health_preferences_desc">Choose what information about food matters most to you.</string>
     <string name="app_settings">App Settings</string>
     <string name="set_your_app_preferences">Set your app preferences</string>
+    <string name="register_btn">Register</string>
+    <string name="name">Name</string>
 </resources>
