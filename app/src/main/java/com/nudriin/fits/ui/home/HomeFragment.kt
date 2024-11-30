@@ -8,10 +8,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nudriin.fits.R
 import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
@@ -26,6 +28,9 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private var currentImageUri: Uri? = null
     private val homeViewModel: HomeViewModel by viewModels {
+        ViewModelFactory.getInstance(requireContext())
+    }
+    private val authViewModel: AuthViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -45,6 +50,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupView() {
+        authViewModel.getSession().observe(viewLifecycleOwner) { session ->
+            binding.tvProfileName.text = resources.getString(R.string.hi_fits_users, session.name)
+        }
+
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.rvHomeArticle.layoutManager = layoutManager
 
