@@ -16,7 +16,7 @@ import retrofit2.http.Path
 
 interface ApiService {
     @POST("users")
-    fun saveUser(@Body userSaveRequest: UserSaveRequest): Call<UserSaveResponse>
+    suspend fun saveUser(@Body userSaveRequest: UserSaveRequest): UserSaveResponse
 
     @POST("users/login")
     suspend fun login(@Body loginRequest: UserLoginRequest): UserLoginResponse

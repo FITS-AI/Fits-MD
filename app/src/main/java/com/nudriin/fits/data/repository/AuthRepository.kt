@@ -6,6 +6,7 @@ import androidx.lifecycle.liveData
 import com.google.gson.Gson
 import com.nudriin.fits.data.dto.error.ErrorResponse
 import com.nudriin.fits.data.dto.user.UserLoginRequest
+import com.nudriin.fits.data.dto.user.UserSaveRequest
 import com.nudriin.fits.data.pref.UserModel
 import com.nudriin.fits.data.pref.UserPreference
 import com.nudriin.fits.data.retrofit.ApiService
@@ -33,6 +34,20 @@ class AuthRepository private constructor(
         emit(Result.Loading)
         try {
             val response = apiService.login(request)
+            emit(Result.Success(response))
+        } catch (e: HttpException) {
+            val response = e.response()?.errorBody()?.string()
+            val body = Gson().fromJson(response, ErrorResponse::class.java)
+            emit(Result.Error(Event(body.message)))
+        } catch (e: Exception) {
+            emit(Result.Error(Event(e.message ?: "An error occurred")))
+        }
+    }
+
+    fun register(request: UserSaveRequest) = liveData {
+        emit(Result.Loading)
+        try {
+            val response = apiService.saveUser(request)
             emit(Result.Success(response))
         } catch (e: HttpException) {
             val response = e.response()?.errorBody()?.string()
