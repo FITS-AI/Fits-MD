@@ -15,7 +15,6 @@ import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.databinding.FragmentHomeBinding
 import com.nudriin.fits.ui.camera.CameraActivity
-import com.nudriin.fits.ui.main.MainViewModel
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -27,7 +26,7 @@ class HomeFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
-    private val mainViewModel: MainViewModel by viewModels {
+    private val homeViewModel: HomeViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -58,7 +57,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        mainViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
+        homeViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
                 }
