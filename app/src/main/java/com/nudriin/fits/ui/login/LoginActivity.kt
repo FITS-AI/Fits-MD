@@ -10,11 +10,14 @@ import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.viewModels
 import com.nudriin.fits.ui.main.MainActivity
 import com.nudriin.fits.R
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.user.UserLoginRequest
 import com.nudriin.fits.data.pref.UserModel
 import com.nudriin.fits.databinding.ActivityLoginBinding
+import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 
@@ -24,11 +27,23 @@ class LoginActivity : AppCompatActivity() {
     private val viewModel: LoginViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
+    private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        authViewModel.getSession().observe(this) { session ->
+            if (session.token.isNotEmpty()) {
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags =
+                    Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+                startActivity(intent)
+            }
+        }
 
         setupView()
         setupAction()
@@ -43,7 +58,6 @@ class LoginActivity : AppCompatActivity() {
             validatePassword()
         }
 
-//        if (!validateEmail() or !validatePassword()) return
 
         binding.btnLogin.setOnClickListener {
             val email = binding.emailEditText.text.toString()
