@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.text.HtmlCompat
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.nudriin.fits.R
 import com.nudriin.fits.data.dto.article.ArticleItem
@@ -25,7 +26,12 @@ class ArticleDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        setupView()
+        setupAction()
+    }
 
+    private fun setupView() {
         val articleData = ArticleDetailFragmentArgs.fromBundle(arguments as Bundle)
         article = ArticleItem(
             id = articleData.articleId,
@@ -36,10 +42,6 @@ class ArticleDetailFragment : Fragment() {
             createdAt = articleData.date
         )
 
-        setupView()
-    }
-
-    private fun setupView() {
         Glide.with(this).load(article.imgUrl).into(binding.ivArticleDetailThumbnail)
 
         with(binding) {
@@ -52,4 +54,9 @@ class ArticleDetailFragment : Fragment() {
         }
     }
 
+    private fun setupAction() {
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
+    }
 }
