@@ -14,10 +14,13 @@ import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.fragment.app.add
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nudriin.fits.R
 import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
+import com.nudriin.fits.ui.articlesList.ArticlesListFragment
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
@@ -67,10 +70,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         setupView()
+        setupAction()
 
-        binding.btnHomeScan.setOnClickListener {
-            startCameraX()
-        }
     }
 
     private fun setupView() {
@@ -99,6 +100,26 @@ class MainActivity : AppCompatActivity() {
                         showToast(toastText.toString())
                     }
                 }
+            }
+        }
+    }
+
+    private fun setupAction() {
+        binding.btnHomeScan.setOnClickListener {
+            startCameraX()
+        }
+
+        binding.tvSeeAllArticle.setOnClickListener {
+            val fragmentManager = supportFragmentManager
+            val articleListFragment = ArticlesListFragment()
+            val fragment =
+                fragmentManager.findFragmentByTag(ArticlesListFragment::class.java.simpleName)
+            if (fragment !is ArticlesListFragment) {
+                fragmentManager.beginTransaction().add(
+                    R.id.frame_container,
+                    articleListFragment,
+                    ArticlesListFragment::class.java.simpleName
+                ).commit()
             }
         }
     }

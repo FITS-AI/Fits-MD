@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fits_navigation"
+    app:startDestination="@id/mainActivity">
+
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.nudriin.fits.ui.main.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" />
+    <fragment
+        android:id="@+id/articlesListFragment"
+        android:name="com.nudriin.fits.ui.articlesList.ArticlesListFragment"
+        android:label="fragment_articles_list"
+        tools:layout="@layout/fragment_articles_list" />
+</navigation>
