@@ -22,4 +22,10 @@
     <string name="password_error_empty">Password is required</string>
     <string name="email_error_empty">Email is required</string>
     <string name="email_error_invalid">Email invalid</string>
+    <string name="logout">Logout</string>
+    <string name="your_scan_history">Your scan history</string>
+    <string name="health_preferences">Health Preferences</string>
+    <string name="health_preferences_desc">Choose what information about food matters most to you.</string>
+    <string name="app_settings">App Settings</string>
+    <string name="set_your_app_preferences">Set your app preferences</string>
 </resources>
