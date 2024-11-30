@@ -14,23 +14,27 @@ import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.fragment.app.add
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.nudriin.fits.R
+import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
+import com.nudriin.fits.ui.articlesList.ArticlesListFragment
 import com.nudriin.fits.ui.camera.CameraActivity
+import com.nudriin.fits.ui.home.HomeFragment
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private var currentImageUri: Uri? = null
+
     private val authViewModel: AuthViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
-    private val mainViewModel: MainViewModel by viewModels {
-        ViewModelFactory.getInstance(this)
-    }
+
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -61,20 +65,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        if (!allPermissionsGranted()) {
-            requestPermissionLauncher.launch(REQUIRED_PERMISSION)
-        }
-
-        setupView()
-
-        binding.btnHomeScan.setOnClickListener {
-            startCameraX()
-        }
-    }
-
-    private fun setupView() {
-        val layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        binding.rvHomeArticle.layoutManager = layoutManager
         authViewModel.getSession().observe(this) { session ->
             if (session.token.isEmpty()) {
                 val intent = Intent(this, WelcomeActivity::class.java)
@@ -84,39 +74,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        mainViewModel.getAllArticle().observe(this@MainActivity) { result ->
-            when (result) {
-                is Result.Loading -> {
-                }
-
-                is Result.Success -> {
-                    setArticleList(result.data.article)
-                }
-
-                is Result.Error -> {
-                    result.error.getContentIfNotHandled().let { toastText ->
-                        showToast(toastText.toString())
-                    }
-                }
-            }
+        if (!allPermissionsGranted()) {
+            requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
-    }
 
-    private fun setArticleList(articleList: List<ArticleItem>) {
-        val articles = articleList.take(5)
-        val adapter = ArticleAdapter(articles)
-        binding.rvHomeArticle.adapter = adapter
-        adapter.setOnItemClickCallback(object : ArticleAdapter.OnItemClickCallback {
-            override fun onItemClicked(articleId: String) {
-                TODO("Not yet implemented")
-            }
-
-        })
-    }
-
-    private fun startCameraX() {
-        val intent = Intent(this, CameraActivity::class.java)
-        startActivity(intent)
     }
 
     private fun showToast(message: String) {

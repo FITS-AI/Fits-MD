@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/ash"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.articlesList.ArticlesListFragment">
 
@@ -17,13 +18,17 @@
         app:srcCompat="@drawable/ic_back" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_article_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:paddingHorizontal="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/backBtn"
+        android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backBtn"
+        app:layout_constraintVertical_bias="0.0"
         tools:listitem="@layout/article_list_card" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

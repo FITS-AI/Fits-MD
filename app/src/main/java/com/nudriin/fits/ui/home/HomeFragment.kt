@@ -1,5 +1,7 @@
-package com.nudriin.fits.ui.articlesList
+package com.nudriin.fits.ui.home
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -10,19 +12,20 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.nudriin.fits.adapter.ArticleListAdapter
+import com.nudriin.fits.adapter.ArticleAdapter
+import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
-import com.nudriin.fits.databinding.FragmentArticlesListBinding
-import com.nudriin.fits.ui.home.HomeFragmentDirections
-import com.nudriin.fits.ui.main.MainViewModel
+import com.nudriin.fits.databinding.FragmentHomeBinding
+import com.nudriin.fits.ui.camera.CameraActivity
+import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 
-class ArticlesListFragment : Fragment() {
-    private var _binding: FragmentArticlesListBinding? = null
+class HomeFragment : Fragment() {
+    private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
-
-    private val mainViewModel: MainViewModel by viewModels {
+    private var currentImageUri: Uri? = null
+    private val homeViewModel: HomeViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -30,24 +33,24 @@ class ArticlesListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentArticlesListBinding.inflate(inflater, container, false)
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupView()
         setupAction()
     }
 
     private fun setupView() {
-        val layoutManager = LinearLayoutManager(context)
-        binding.rvArticleList.layoutManager = layoutManager
+        val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvHomeArticle.layoutManager = layoutManager
 
-        mainViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
+        homeViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
-//                    TODO("Create Loading")
                 }
 
                 is Result.Success -> {
@@ -64,15 +67,20 @@ class ArticlesListFragment : Fragment() {
     }
 
     private fun setupAction() {
-        binding.backBtn.setOnClickListener {
-            findNavController().navigateUp()
+        binding.btnHomeScan.setOnClickListener {
+            startCameraX()
+        }
+
+        binding.tvSeeAllArticle.setOnClickListener {
+            moveToArticleList()
         }
     }
 
     private fun setArticleList(articleList: List<ArticleItem>) {
-        val adapter = ArticleListAdapter(articleList)
-        binding.rvArticleList.adapter = adapter
-        adapter.setOnItemClickCallback(object : ArticleListAdapter.OnItemClickCallback {
+        val articles = articleList.take(5)
+        val adapter = ArticleAdapter(articles)
+        binding.rvHomeArticle.adapter = adapter
+        adapter.setOnItemClickCallback(object : ArticleAdapter.OnItemClickCallback {
             override fun onItemClicked(
                 articleId: Int,
                 title: String,
@@ -83,7 +91,13 @@ class ArticlesListFragment : Fragment() {
             ) {
                 moveToArticleDetail(articleId, title, author, content, imgUrl, date)
             }
+
         })
+    }
+
+    private fun moveToArticleList() {
+        val toArticleList = HomeFragmentDirections.actionHomeFragmentToArticlesListFragment()
+        Navigation.findNavController(binding.root).navigate(toArticleList)
     }
 
     private fun moveToArticleDetail(
@@ -94,14 +108,20 @@ class ArticlesListFragment : Fragment() {
         imgUrl: String,
         date: String
     ) {
-        val toArticleDetail =
-            ArticlesListFragmentDirections.actionArticlesListFragmentToArticleDetailFragment(
-                articleId, title, author, content, imgUrl, date
-            )
+        val toArticleDetail = HomeFragmentDirections.actionHomeFragmentToArticleDetailFragment(
+            articleId, title, author, content, imgUrl, date
+        )
         Navigation.findNavController(binding.root).navigate(toArticleDetail)
+    }
+
+    private fun startCameraX() {
+        val intent = Intent(requireActivity(), CameraActivity::class.java)
+        startActivity(intent)
     }
 
     private fun showToast(message: String) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
+
+
 }

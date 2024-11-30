@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fits_navigation"
+    app:startDestination="@id/homeFragment">
+
+    <fragment
+        android:id="@+id/articlesListFragment"
+        android:name="com.nudriin.fits.ui.articlesList.ArticlesListFragment"
+        android:label="fragment_articles_list"
+        tools:layout="@layout/fragment_articles_list">
+        <action
+            android:id="@+id/action_articlesListFragment_to_articleDetailFragment"
+            app:destination="@id/articleDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.nudriin.fits.ui.home.HomeFragment"
+        android:label="fragment_home"
+        tools:layout="@layout/fragment_home">
+        <action
+            android:id="@+id/action_homeFragment_to_articlesListFragment"
+            app:destination="@id/articlesListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_articleDetailFragment"
+            app:destination="@id/articleDetailFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_scanHistoryFragment"
+            app:destination="@id/scanHistoryFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_scanHistoryDetailFragment"
+            app:destination="@id/scanHistoryDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/articleDetailFragment"
+        android:name="com.nudriin.fits.ui.articleDetail.ArticleDetailFragment"
+        android:label="fragment_article_detail"
+        tools:layout="@layout/fragment_article_detail">
+
+        <argument
+            android:name="articleId"
+            app:argType="integer" />
+        <argument
+            android:name="title"
+            app:argType="string" />
+        <argument
+            android:name="author"
+            app:argType="string" />
+        <argument
+            android:name="content"
+            app:argType="string" />
+        <argument
+            android:name="img_url"
+            app:argType="string" />
+        <argument
+            android:name="date"
+            app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/scanHistoryFragment"
+        android:name="com.nudriin.fits.ui.scanHistory.ScanHistoryFragment"
+        android:label="fragment_scan_history"
+        tools:layout="@layout/fragment_scan_history">
+        <action
+            android:id="@+id/action_scanHistoryFragment_to_scanHistoryDetailFragment"
+            app:destination="@id/scanHistoryDetailFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/scanHistoryDetailFragment"
+        android:name="com.nudriin.fits.ui.scanHistoryDetail.ScanHistoryDetailFragment"
+        android:label="fragment_scan_history_detail"
+        tools:layout="@layout/fragment_scan_history_detail" />
+</navigation>
