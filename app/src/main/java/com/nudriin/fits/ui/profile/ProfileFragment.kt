@@ -30,7 +30,15 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupView()
         setupAction()
+    }
+
+    private fun setupView() {
+        authViewModel.getSession().observe(viewLifecycleOwner) { session ->
+            binding.tvName.text = session.name
+            binding.tvEmail.text = session.email
+        }
     }
 
     private fun setupAction() {
