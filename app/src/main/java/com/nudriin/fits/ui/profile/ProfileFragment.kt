@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.nudriin.fits.R
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.databinding.FragmentProfileBinding
@@ -35,6 +36,10 @@ class ProfileFragment : Fragment() {
     private fun setupAction() {
         binding.btnLogout.setOnClickListener {
             authViewModel.logout()
+        }
+
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
         }
     }
 
