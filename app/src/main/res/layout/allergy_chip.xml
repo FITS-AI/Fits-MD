@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.chip.Chip xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/allergyChip"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_gravity="center"
+    android:layout_margin="4dp"
+    android:ellipsize="end"
+    android:maxLines="1"
+    android:minHeight="48dp"
+    android:textSize="14sp"
+    tools:text="Allergy Name"
     style="@style/Widget.MaterialComponents.Chip.Choice"
-    android:checkable="true"
-    android:text="Allergy Name" />
+    android:checkable="true" />
