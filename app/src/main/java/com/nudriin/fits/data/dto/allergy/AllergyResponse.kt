@@ -7,8 +7,8 @@ data class AllergyGetAllResponse(
     @field:SerializedName("success")
     val success: Boolean,
 
-    @field:SerializedName("allergy")
-    val allergy: List<AllergyItem>,
+    @field:SerializedName("data")
+    val data: List<AllergyItem>,
 
     @field:SerializedName("message")
     val message: String

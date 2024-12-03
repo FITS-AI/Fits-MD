@@ -1,11 +1,13 @@
 package com.nudriin.fits.ui.allergy
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import com.nudriin.fits.adapter.AllergyAdapter
 import com.nudriin.fits.databinding.FragmentAllergyBinding
@@ -48,10 +50,10 @@ class AllergyFragment : Fragment() {
                 }
 
                 is Result.Success -> {
-                    allergyAdapter = AllergyAdapter(result.data.allergy) { selectedAllergies ->
+                    allergyAdapter = AllergyAdapter(result.data.data) { selectedAllergies ->
                         binding.btnSave.isEnabled = selectedAllergies.isNotEmpty()
                     }
-                    binding.rvAllergy.adapter
+                    binding.rvAllergy.adapter = allergyAdapter
                 }
 
                 is Result.Error -> {
@@ -67,7 +69,29 @@ class AllergyFragment : Fragment() {
         binding.btnSave.setOnClickListener {
             val selectedAllergies = allergyAdapter.selectedAllergies
             val allergyIds = selectedAllergies.map { it.id }
-            allergyViewModel.saveUserAllergy(allergyIds)
+            allergyViewModel.saveUserAllergy(allergyIds).observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        binding.btnSave.isEnabled = false
+                    }
+
+                    is Result.Success -> {
+                        Log.d("AllergyFragment", result.data.toString())
+                        binding.btnSave.isEnabled = true
+                        showToast(requireContext(), result.data.message)
+                        val toProfile =
+                            AllergyFragmentDirections.actionAllergyFragmentToProfileFragment()
+                        Navigation.findNavController(binding.root).navigate(toProfile)
+                    }
+
+                    is Result.Error -> {
+                        binding.btnSave.isEnabled = true
+                        result.error.getContentIfNotHandled().let { toastText ->
+                            showToast(requireContext(), toastText.toString())
+                        }
+                    }
+                }
+            }
         }
     }
 }

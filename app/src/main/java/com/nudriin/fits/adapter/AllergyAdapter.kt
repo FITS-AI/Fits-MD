@@ -16,7 +16,7 @@ class AllergyAdapter(
 
     inner class AllergyViewHolder(private val binding: AllergyChipBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        val chip: Chip = binding.allergyChip
+        private val chip: Chip = binding.allergyChip
         fun bind(allergyItem: AllergyItem) {
             chip.text = allergyItem.allergyName
             chip.isCheckable = true

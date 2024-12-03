@@ -87,5 +87,9 @@
         android:id="@+id/allergyFragment"
         android:name="com.nudriin.fits.ui.allergy.AllergyFragment"
         android:label="fragment_allergy"
-        tools:layout="@layout/fragment_allergy" />
+        tools:layout="@layout/fragment_allergy">
+        <action
+            android:id="@+id/action_allergyFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
 </navigation>
