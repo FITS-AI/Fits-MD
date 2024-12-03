@@ -16,7 +16,7 @@
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/allergyRecyclerView"
+        android:id="@+id/rv_allergy"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -25,7 +25,7 @@
         tools:listitem="@layout/allergy_chip" />
 
     <Button
-        android:id="@+id/saveAllergyButton"
+        android:id="@+id/btn_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Simpan Alergi" />

@@ -12,7 +12,7 @@ class AllergyAdapter(
     private val onSelectionChanged: (List<AllergyItem>) -> Unit
 ) : RecyclerView.Adapter<AllergyAdapter.AllergyViewHolder>() {
 
-    private val selectedAllergies = mutableListOf<AllergyItem>()
+    val selectedAllergies = mutableListOf<AllergyItem>()
 
     inner class AllergyViewHolder(private val binding: AllergyChipBinding) :
         RecyclerView.ViewHolder(binding.root) {
