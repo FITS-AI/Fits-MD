@@ -1,5 +1,7 @@
 package com.nudriin.fits.data.retrofit
 
+import com.nudriin.fits.data.dto.allergy.AllergyGetAllResponse
+import com.nudriin.fits.data.dto.allergy.AllergyUserSaveResponse
 import com.nudriin.fits.data.dto.article.ArticleGetAllResponse
 import com.nudriin.fits.data.dto.user.UserGetByIdResponse
 import com.nudriin.fits.data.dto.user.UserLoginRequest
@@ -28,4 +30,10 @@ interface ApiService {
     suspend fun getAllArticle(
         @Header("Authorization") token: String
     ): ArticleGetAllResponse
+
+    @GET("allergy")
+    suspend fun getAllAllergy(@Header("Authorization") token: String): AllergyGetAllResponse
+
+    @POST("users/allergy")
+    suspend fun saveAllergy(@Header("Authorization") token: String): AllergyUserSaveResponse
 }
