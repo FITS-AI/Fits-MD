@@ -26,7 +26,7 @@ class ArticleDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupView()
         setupAction()
     }
@@ -39,7 +39,7 @@ class ArticleDetailFragment : Fragment() {
             author = articleData.author,
             content = articleData.content,
             imgUrl = articleData.imgUrl,
-            createdAt = articleData.date
+            createdAt = articleData.date,
         )
 
         Glide.with(this).load(article.imgUrl).into(binding.ivArticleDetailThumbnail)
@@ -48,9 +48,8 @@ class ArticleDetailFragment : Fragment() {
             tvArticleDetailTitle.text = article.title
             tvArticleDetailAuthor.text = article.author
 
-//          TODO(Change to markdown)
             tvArticleDetailContent.text =
-                HtmlCompat.fromHtml(article.content, HtmlCompat.FROM_HTML_MODE_COMPACT)
+                HtmlCompat.fromHtml(article.content, HtmlCompat.FROM_HTML_OPTION_USE_CSS_COLORS)
         }
     }
 

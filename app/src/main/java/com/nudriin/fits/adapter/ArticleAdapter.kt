@@ -61,11 +61,7 @@ class ArticleAdapter(private val articleList: List<ArticleItem>) :
 
                 tvArticleHomeTitle.text = article.title
 
-                // TODO(Change this to load markdown)
-                tvArticleHomeDescription.text = HtmlCompat.fromHtml(
-                    article.content,
-                    HtmlCompat.FROM_HTML_MODE_COMPACT
-                )
+                tvArticleHomeDescription.text = article.description
             }
         }
 

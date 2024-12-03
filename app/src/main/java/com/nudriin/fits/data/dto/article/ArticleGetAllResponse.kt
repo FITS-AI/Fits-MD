@@ -32,5 +32,8 @@ data class ArticleItem(
     val title: String,
 
     @field:SerializedName("content")
-    val content: String
+    val content: String,
+
+    @field:SerializedName("description")
+    val description: String? = null
 )
