@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.nudriin.fits.R
 import com.nudriin.fits.common.AuthViewModel
@@ -49,6 +50,15 @@ class ProfileFragment : Fragment() {
         binding.backBtn.setOnClickListener {
             findNavController().navigateUp()
         }
+
+        binding.llHealthPreferences.setOnClickListener {
+            moveToAllergy()
+        }
+    }
+
+    private fun moveToAllergy() {
+        val toAllergy = ProfileFragmentDirections.actionProfileFragmentToAllergyFragment()
+        Navigation.findNavController(binding.root).navigate(toAllergy)
     }
 
 }
