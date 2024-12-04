@@ -226,7 +226,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun showDialog(title: String, message: String) {
-        val dialog = Dialog(this)
+        val dialog = Dialog(this, R.style.CustomDialogTheme)
 
         if (dialogBinding.root.parent != null) {
             (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
