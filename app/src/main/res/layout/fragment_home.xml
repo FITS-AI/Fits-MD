@@ -59,7 +59,6 @@
                     android:fontFamily="@font/plus_jakarta_sans_bold"
                     android:gravity="start"
                     android:text="@string/hi_fits_users"
-                    android:textColor="@color/dark"
                     android:textSize="24sp" />
 
                 <de.hdodenhof.circleimageview.CircleImageView
@@ -74,7 +73,7 @@
             <androidx.cardview.widget.CardView
                 android:id="@+id/cv_header"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
+                android:layout_height="210dp"
                 android:layout_marginTop="25dp"
                 app:cardCornerRadius="25dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -89,6 +88,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
+                        android:layout_gravity="center"
                         android:src="@drawable/home_card_bg"
                         tools:ignore="ContentDescription" />
 
@@ -150,7 +150,6 @@
                     android:fontFamily="@font/plus_jakarta_sans_bold"
                     android:gravity="start"
                     android:text="@string/todays_picks"
-                    android:textColor="@color/dark"
                     android:textSize="16sp" />
 
                 <TextView
@@ -160,7 +159,6 @@
                     android:layout_gravity="center_vertical"
                     android:fontFamily="@font/plus_jakarta_sans_bold"
                     android:text="@string/see_all"
-                    android:textColor="@color/dark"
                     android:textSize="16sp" />
             </LinearLayout>
 

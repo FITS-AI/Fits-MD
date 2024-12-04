@@ -3,6 +3,8 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="lime">#C7FF24</color>
+    <color name="limeDark">#A7CD36</color>
+    <color name="limeSecond">#D5ED8F</color>
     <color name="blues">#2f5bf2</color>
     <color name="ash">#EAF0F8</color>
     <color name="dark">#1B1B1B</color>
