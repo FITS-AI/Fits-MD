@@ -40,6 +40,7 @@
             card_view:layout_constraintEnd_toEndOf="parent" />
 
         <Button
+            android:id="@+id/btn_understand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"

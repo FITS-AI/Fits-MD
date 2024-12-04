@@ -1,5 +1,6 @@
 package com.nudriin.fits.ui.camera
 
+import android.app.Dialog
 import android.content.Context
 import androidx.camera.core.Camera
 import android.os.Build
@@ -8,6 +9,7 @@ import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
@@ -20,6 +22,7 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -29,6 +32,7 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
+import com.nudriin.fits.databinding.DialogCameraBinding
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -37,6 +41,7 @@ import java.util.Locale
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
+    private lateinit var dialogBinding: DialogCameraBinding
     private var imageCapture: ImageCapture? = null
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
@@ -52,6 +57,7 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityCameraBinding.inflate(layoutInflater)
+        dialogBinding = DialogCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -76,6 +82,10 @@ class CameraActivity : AppCompatActivity() {
             }
 
         }
+
+        val title = getString(R.string.instruction, "One")
+        val message = getString(R.string.nutrition_table_instruction)
+        showDialog(title, message)
 
         binding.backBtn.setOnClickListener { finish() }
 
@@ -140,7 +150,9 @@ class CameraActivity : AppCompatActivity() {
                         1 -> {
                             nutritionData = "Data Gizi Berhasil di ekstrak"
                             snapState = 2
-                            binding.tvInstruction.text = "Ambil foto komposisi produk"
+                            val title = getString(R.string.instruction, "Two")
+                            val message = getString(R.string.composition_instruction)
+                            showDialog(title, message)
                             binding.progressIndicator.visibility = View.GONE
                         }
 
@@ -171,9 +183,6 @@ class CameraActivity : AppCompatActivity() {
                                 }
                         }
                     }
-
-
-//                    finish()
                 }
 
                 override fun onError(exc: ImageCaptureException) {
@@ -214,6 +223,28 @@ class CameraActivity : AppCompatActivity() {
                 imageCapture?.targetRotation = rotation
             }
         }
+    }
+
+    private fun showDialog(title: String, message: String) {
+        val dialog = Dialog(this)
+
+        if (dialogBinding.root.parent != null) {
+            (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
+        }
+
+        dialogBinding.tvTitle.text = title
+        dialogBinding.tvDescription.text = HtmlCompat.fromHtml(
+            message,
+            HtmlCompat.FROM_HTML_MODE_LEGACY
+        )
+        dialog.setContentView(dialogBinding.root)
+        dialog.setCanceledOnTouchOutside(false)
+
+        dialogBinding.btnUnderstand.setOnClickListener {
+            dialog.cancel()
+        }
+
+        dialog.show()
     }
 
     override fun onStart() {
