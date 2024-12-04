@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
@@ -71,6 +72,10 @@ class AllergyFragment : Fragment() {
     }
 
     private fun setupAction() {
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
+        
         binding.btnSave.setOnClickListener {
             val selectedAllergies = allergyAdapter.selectedAllergies
             val allergyIds = selectedAllergies.map { it.id }
