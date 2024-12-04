@@ -8,7 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
 import com.nudriin.fits.adapter.AllergyAdapter
 import com.nudriin.fits.databinding.FragmentAllergyBinding
 import com.nudriin.fits.utils.Result
@@ -41,7 +43,10 @@ class AllergyFragment : Fragment() {
     }
 
     private fun setupView() {
-        val layoutManager = GridLayoutManager(context, 3)
+        val layoutManager = FlexboxLayoutManager(context).apply {
+            flexDirection = FlexDirection.ROW
+            justifyContent = JustifyContent.FLEX_START
+        }
         binding.rvAllergy.layoutManager = layoutManager
 
         allergyViewModel.getAllAllergy().observe(viewLifecycleOwner) { result ->
