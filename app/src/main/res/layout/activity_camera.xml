@@ -86,7 +86,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:background="@drawable/dark_bg_top_rounded"
+        android:background="@drawable/white_bg_rounded"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp">
@@ -114,7 +114,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/plus_jakarta_sans_bold"
-                    android:textColor="@color/ash"
                     android:text="@string/health_analysis"
                     android:textAppearance="?attr/textAppearanceHeadline6"
                     android:gravity="center"
@@ -125,7 +124,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/plus_jakarta_sans"
-                    android:textColor="@color/ash"
                     tools:text="Grade: A" />
 
                 <TextView
@@ -133,7 +131,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/plus_jakarta_sans"
-                    android:textColor="@color/ash"
                     tools:text="Overall" />
 
                 <androidx.recyclerview.widget.RecyclerView

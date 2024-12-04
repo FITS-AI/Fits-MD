@@ -43,7 +43,7 @@ class SplashActivity : AppCompatActivity() {
                     finish()
                 }
             }
-        }, 2500)
+        }, 3000)
     }
 
     private fun setupView() {

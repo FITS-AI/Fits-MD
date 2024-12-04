@@ -4,6 +4,13 @@
         <!-- Customize your dark theme here. -->
         <item name="colorPrimary">@color/lime</item>
         <item name="colorOnPrimary">@color/dark</item>
+        <item name="colorSecondary">@color/lime</item>
+        <item name="colorOnSecondary">@color/dark</item>
+        <item name="colorTertiary">@color/blues</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorSurface">@color/dark</item>
+        <item name="colorOnBackground">@color/ash</item>
         
+        <!--        <item name="android:windowBackground">@color/dark</item>-->
     </style>
 </resources>
