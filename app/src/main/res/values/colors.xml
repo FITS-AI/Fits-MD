@@ -18,4 +18,12 @@
             <item android:color="@color/white" />
         </selector>
     </color>
+
+
+    <color name="chip_bg">
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:color="@color/design_default_color_primary" android:state_checked="true" />
+            <item android:color="@color/material_grey_300" />
+        </selector>
+    </color>
 </resources>
