@@ -5,7 +5,7 @@
     <Transition
         motion:constraintSetEnd="@+id/end"
         motion:constraintSetStart="@id/start"
-        motion:duration="1500"
+        motion:duration="2000"
         motion:autoTransition="animateToEnd">
         <KeyFrameSet></KeyFrameSet>
     </Transition>
@@ -30,19 +30,8 @@
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
             android:scaleX="0"
-            android:scaleY="0" />
-        <Constraint
-            android:id="@+id/iv_logo_dark"
-            motion:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
-            motion:layout_constraintStart_toStartOf="parent"
-            android:scaleX="1"
-            android:scaleY="1"
-            android:alpha="1"
-            motion:transitionEasing="cubic(0,0.71,0.3,1)" />
+            android:scaleY="0"
+            motion:transitionEasing="cubic(0.72,0.86,0.51,0.96)" />
         <Constraint
             android:id="@+id/tv_app_name"
             motion:layout_constraintEnd_toEndOf="parent"
@@ -74,20 +63,8 @@
             motion:layout_constraintTop_toTopOf="parent"
             motion:layout_constraintStart_toStartOf="parent"
             android:scaleX="1"
-            android:scaleY="1" />
-        <Constraint
-            android:id="@+id/iv_logo_dark"
-            motion:layout_constraintEnd_toEndOf="parent"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
-            motion:layout_constraintBottom_toBottomOf="parent"
-            motion:layout_constraintTop_toTopOf="parent"
-            motion:layout_constraintStart_toStartOf="parent"
-            android:scaleX="0"
-            android:scaleY="0"
-            android:alpha="0"
-            motion:transitionEasing="cubic(0,1,0.15,1)"
-            android:visibility="gone" />
+            android:scaleY="1"
+            motion:transitionEasing="cubic(0,1,0.28,1)" />
         <Constraint
             android:id="@+id/tv_app_name"
             motion:layout_constraintEnd_toEndOf="parent"
