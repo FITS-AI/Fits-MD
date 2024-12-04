@@ -78,5 +78,18 @@
         android:id="@+id/profileFragment"
         android:name="com.nudriin.fits.ui.profile.ProfileFragment"
         android:label="fragment_profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_profileFragment_to_allergyFragment"
+            app:destination="@id/allergyFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/allergyFragment"
+        android:name="com.nudriin.fits.ui.allergy.AllergyFragment"
+        android:label="fragment_allergy"
+        tools:layout="@layout/fragment_allergy">
+        <action
+            android:id="@+id/action_allergyFragment_to_profileFragment"
+            app:destination="@id/profileFragment" />
+    </fragment>
 </navigation>

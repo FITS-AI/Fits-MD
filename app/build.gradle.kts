@@ -108,4 +108,8 @@ dependencies {
     // navigation
     implementation(libs.androidx.navigation.fragment.ktx.v284)
     implementation(libs.androidx.navigation.ui.ktx.v284)
+
+    // flexbox manager
+    implementation(libs.flexbox)
+
 }
