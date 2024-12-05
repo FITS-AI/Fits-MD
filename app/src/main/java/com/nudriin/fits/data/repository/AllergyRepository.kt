@@ -53,6 +53,24 @@ class AllergyRepository private constructor(
         }
     }
 
+    fun getAllergyByUserId() = liveData {
+        emit(Result.Loading)
+        try {
+            val response =
+                apiService.getUserById(
+                    userPreference.getSession().first().token.toJWT(),
+                    userPreference.getSession().first().id
+                )
+            emit(Result.Success(response))
+        } catch (e: HttpException) {
+            val response = e.response()?.errorBody()?.string()
+            val body = Gson().fromJson(response, ErrorResponse::class.java)
+            emit(Result.Error(Event(body.message)))
+        } catch (e: Exception) {
+            emit(Result.Error(Event(e.message ?: "An error occurred")))
+        }
+    }
+
     companion object {
         @Volatile
         private var instance: AllergyRepository? = null

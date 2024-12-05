@@ -25,7 +25,10 @@ interface ApiService {
     suspend fun login(@Body loginRequest: UserLoginRequest): UserLoginResponse
 
     @GET("users/{id}")
-    fun getUserById(@Path("id") id: String): Call<UserGetByIdResponse>
+    suspend fun getUserById(
+        @Header("Authorization") token: String,
+        @Path("id") id: String
+    ): UserGetByIdResponse
 
     @GET("articles")
     suspend fun getAllArticle(

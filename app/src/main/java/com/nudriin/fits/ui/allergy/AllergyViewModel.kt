@@ -9,4 +9,6 @@ class AllergyViewModel(
     fun getAllAllergy() = allergyRepository.getAllAllergy()
 
     fun saveUserAllergy(request: List<Int>) = allergyRepository.saveUserAllergy(request)
+
+    fun getAllergyByUserId() = allergyRepository.getAllergyByUserId()
 }
