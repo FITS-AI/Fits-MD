@@ -42,4 +42,5 @@
     <string name="show_saved_allergy">Show saved allergy</string>
     <string name="delete_allergy">Delete</string>
     <string name="your_allergies">Your allergies</string>
+    <string name="data_not_found">Data not found</string>
 </resources>

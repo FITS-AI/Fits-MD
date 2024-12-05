@@ -79,10 +79,19 @@ class AllergyFragment : Fragment() {
                         binding.btnSave.isEnabled = selectedAllergies.isNotEmpty()
                     }
                     binding.rvAllergy.adapter = allergyAdapter
+
+                    if (result.data.data.isEmpty()) {
+                        binding.rvAllergy.visibility = View.GONE
+                        binding.ivAllergyNotFound.visibility = View.VISIBLE
+                        binding.tvAllergyNotFound.visibility = View.VISIBLE
+                    }
                 }
 
                 is Result.Error -> {
                     showLoading(false)
+                    binding.rvAllergy.visibility = View.GONE
+                    binding.ivAllergyNotFound.visibility = View.VISIBLE
+                    binding.tvAllergyNotFound.visibility = View.VISIBLE
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
@@ -110,10 +119,19 @@ class AllergyFragment : Fragment() {
                         binding.rvSavedAllergy.adapter = savedAllergyAdapter
                         bottomSheetBehavior.state =
                             BottomSheetBehavior.STATE_EXPANDED
+
+                        if (result.data.user.first().usersAllergy.isEmpty()) {
+                            binding.rvSavedAllergy.visibility = View.GONE
+                            binding.ivNotFound.visibility = View.VISIBLE
+                            binding.tvNotFound.visibility = View.VISIBLE
+                        }
                     }
 
                     is Result.Error -> {
                         binding.btnSave.isEnabled = true
+                        binding.rvSavedAllergy.visibility = View.GONE
+                        binding.ivNotFound.visibility = View.VISIBLE
+                        binding.tvNotFound.visibility = View.VISIBLE
                         result.error.getContentIfNotHandled().let { toastText ->
                             showToast(requireContext(), toastText.toString())
                         }

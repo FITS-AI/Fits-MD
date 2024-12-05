@@ -259,7 +259,7 @@
                     android:fontFamily="@font/plus_jakarta_sans_bold"
                     android:textSize="16sp"
                     android:textAlignment="center"
-                    android:text="Data not found"
+                    android:text="@string/data_not_found"
                     android:textColor="@color/ash"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
