@@ -148,6 +148,7 @@ class CameraActivity : AppCompatActivity() {
 
                     when (snapState) {
                         1 -> {
+                            showToast(this@CameraActivity, "Success get nutritional fact data!")
                             nutritionData = "Data Gizi Berhasil di ekstrak"
                             snapState = 2
                             val title = getString(R.string.instruction, "Two")
@@ -166,7 +167,6 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
-                                        binding.progressIndicator.visibility = View.GONE
                                         compositionData = detectedText
                                         binding.tvGradeBottomSheet.text =
                                             "Nutritional: ${nutritionData}"
@@ -175,11 +175,13 @@ class CameraActivity : AppCompatActivity() {
                                         bottomSheetBehavior.state =
                                             BottomSheetBehavior.STATE_EXPANDED
                                     } else {
-                                        binding.progressIndicator.visibility = View.GONE
+                                        showToast(this@CameraActivity, "An error occurred!")
                                     }
+                                    binding.progressIndicator.visibility = View.GONE
                                 }
                                 .addOnFailureListener {
                                     binding.progressIndicator.visibility = View.GONE
+                                    showToast(this@CameraActivity, "An error occurred!")
                                 }
                         }
                     }
