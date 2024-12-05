@@ -70,9 +70,11 @@ class AllergyFragment : Fragment() {
         allergyViewModel.getAllAllergy().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
+                    showLoading(true)
                 }
 
                 is Result.Success -> {
+                    showLoading(false)
                     allergyAdapter = AllergyAdapter(result.data.data) { selectedAllergies ->
                         binding.btnSave.isEnabled = selectedAllergies.isNotEmpty()
                     }
@@ -80,6 +82,7 @@ class AllergyFragment : Fragment() {
                 }
 
                 is Result.Error -> {
+                    showLoading(false)
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
@@ -126,9 +129,11 @@ class AllergyFragment : Fragment() {
                 when (result) {
                     is Result.Loading -> {
                         binding.btnSave.isEnabled = false
+                        showLoading(true)
                     }
 
                     is Result.Success -> {
+                        showLoading(false)
                         Log.d("AllergyFragment", result.data.toString())
                         binding.btnSave.isEnabled = true
                         showToast(requireContext(), result.data.message)
@@ -138,6 +143,7 @@ class AllergyFragment : Fragment() {
                     }
 
                     is Result.Error -> {
+                        showLoading(false)
                         binding.btnSave.isEnabled = true
                         result.error.getContentIfNotHandled().let { toastText ->
                             showToast(requireContext(), toastText.toString())
@@ -145,6 +151,14 @@ class AllergyFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.GONE
         }
     }
 }
