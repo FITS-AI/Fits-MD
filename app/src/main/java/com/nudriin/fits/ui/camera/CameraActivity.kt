@@ -136,12 +136,12 @@ class CameraActivity : AppCompatActivity() {
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
+        binding.progressIndicator.visibility = View.VISIBLE
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    binding.progressIndicator.visibility = View.VISIBLE
 //                    val intent = Intent()
 //                    intent.putExtra(EXTRA_CAMERAX_IMAGE, output.savedUri.toString())
 //                    setResult(CAMERAX_RESULT, intent)
