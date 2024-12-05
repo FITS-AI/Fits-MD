@@ -6,13 +6,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.fragment.app.viewModels
 import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.nudriin.fits.adapter.AllergyAdapter
+import com.nudriin.fits.adapter.SavedAllergyAdapter
+import com.nudriin.fits.data.dto.allergy.AllergyItem
+import com.nudriin.fits.data.dto.user.UsersAllergyItem
 import com.nudriin.fits.databinding.FragmentAllergyBinding
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -21,12 +26,14 @@ import com.nudriin.fits.utils.showToast
 class AllergyFragment : Fragment() {
     private var _binding: FragmentAllergyBinding? = null
     private val binding get() = _binding!!
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
 
     private val allergyViewModel: AllergyViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
     private lateinit var allergyAdapter: AllergyAdapter
+    private lateinit var savedAllergyAdapter: SavedAllergyAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,11 +51,21 @@ class AllergyFragment : Fragment() {
     }
 
     private fun setupView() {
+        bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
+
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+
         val layoutManager = FlexboxLayoutManager(context).apply {
             flexDirection = FlexDirection.ROW
             justifyContent = JustifyContent.FLEX_START
         }
+
+        val savedAllergyLayoutManager = FlexboxLayoutManager(context).apply {
+            flexDirection = FlexDirection.ROW
+            justifyContent = JustifyContent.FLEX_START
+        }
         binding.rvAllergy.layoutManager = layoutManager
+        binding.rvSavedAllergy.layoutManager = savedAllergyLayoutManager
 
         allergyViewModel.getAllAllergy().observe(viewLifecycleOwner) { result ->
             when (result) {
@@ -75,7 +92,33 @@ class AllergyFragment : Fragment() {
         binding.backBtn.setOnClickListener {
             findNavController().navigateUp()
         }
-        
+
+        binding.btnSavedAllergy.setOnClickListener {
+
+            allergyViewModel.getAllergyByUserId().observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        binding.btnSave.isEnabled = false
+                    }
+
+                    is Result.Success -> {
+                        savedAllergyAdapter =
+                            SavedAllergyAdapter(result.data.user.first().usersAllergy)
+                        binding.rvSavedAllergy.adapter = savedAllergyAdapter
+                        bottomSheetBehavior.state =
+                            BottomSheetBehavior.STATE_EXPANDED
+                    }
+
+                    is Result.Error -> {
+                        binding.btnSave.isEnabled = true
+                        result.error.getContentIfNotHandled().let { toastText ->
+                            showToast(requireContext(), toastText.toString())
+                        }
+                    }
+                }
+            }
+        }
+
         binding.btnSave.setOnClickListener {
             val selectedAllergies = allergyAdapter.selectedAllergies
             val allergyIds = selectedAllergies.map { it.id }
