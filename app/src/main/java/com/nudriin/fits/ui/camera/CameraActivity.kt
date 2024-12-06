@@ -33,6 +33,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.utils.HealthRecomendationHelper
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -51,6 +52,7 @@ class CameraActivity : AppCompatActivity() {
     private var snapState = 1
     private lateinit var nutritionData: String
     private lateinit var compositionData: String
+    private lateinit var healthRecomendationHelper: HealthRecomendationHelper
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +66,16 @@ class CameraActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        healthRecomendationHelper = HealthRecomendationHelper(
+            context = this,
+            onResult = { result ->
+                binding.tvGradeBottomSheet.text = result
+            },
+            onError = { msg ->
+                showToast(this@CameraActivity, msg)
+            }
+        )
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
@@ -168,8 +180,14 @@ class CameraActivity : AppCompatActivity() {
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
                                         compositionData = detectedText
-                                        binding.tvGradeBottomSheet.text =
-                                            "Nutritional: ${nutritionData}"
+
+                                        // TODO( Change this with analysis result)
+                                        val inputString =
+                                            "0.0, 1.0, 1.1, 10.0" // Contoh input gula, lemak, protein, kalori
+                                        val inputValues =
+                                            inputString.split(",").map { it.trim().toFloat() }
+                                                .toFloatArray()
+                                        healthRecomendationHelper.predict(inputValues)
                                         binding.tvOverallBottomSheet.text =
                                             "Composition: ${compositionData}"
                                         bottomSheetBehavior.state =
@@ -257,6 +275,11 @@ class CameraActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         orientationEventListener.disable()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        healthRecomendationHelper.close()
     }
 
     companion object {

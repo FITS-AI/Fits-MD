@@ -37,18 +37,27 @@ class HealthRecomendationHelper(
         }
     }
 
-    fun predict(input: String) {
+    fun predict(input: FloatArray) {
         if (interpreter == null) {
             return
         }
 
-        val inputArray = FloatArray(1)
-        inputArray[0] = input.toFloat()
+        val inputArray = arrayOf(input)
         val outputArray = Array(1) { FloatArray(4) }
 
         try {
             interpreter?.run(inputArray, outputArray)
-            onResult(outputArray[0][0].toString())
+            Log.d(TAG, outputArray[0].joinToString(", "))
+            val predictedGrades = outputArray[0]
+            val predictedIndex = predictedGrades.indices.maxByOrNull { predictedGrades[it] } ?: -1
+            val predictedLabel = when (predictedIndex) {
+                0 -> "A"
+                1 -> "B"
+                2 -> "C"
+                3 -> "D"
+                else -> "Unknown"
+            }
+            onResult(predictedLabel)
         } catch (e: Exception) {
             onError("TFLite interpreter not loaded")
             Log.e(TAG, e.message.toString())
