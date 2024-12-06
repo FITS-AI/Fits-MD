@@ -115,9 +115,9 @@ class HealthRecommendationHelper(
     ): HealthRecommendationSummary {
         val healthRecommendationSummary: HealthRecommendationSummary
         when (grade) {
-            (grade == "A").toString() -> {
+            "A" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "Healthy Food",
+                    "'A' Healthy Food",
                     "Excellent for health. This food is nutrient-dense and can help maintain weight and heart health",
                     "Low (less than 5g per serving)",
                     "Low (less than 5g per serving, with minimal saturated fat)",
@@ -127,9 +127,9 @@ class HealthRecommendationHelper(
                 )
             }
 
-            (grade == "B").toString() -> {
+            "B" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "Good Food",
+                    "'B' Good Food",
                     "Good for health. This food can be part of a balanced diet, although portion size and frequency of consumption should be monitored",
                     "Moderate (5-10g per serving)",
                     "Moderate (5-10g per serving, with controlled saturated fat)",
@@ -139,9 +139,9 @@ class HealthRecommendationHelper(
                 )
             }
 
-            (grade == "C").toString() -> {
+            "C" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "Fair Food",
+                    "'C' Fair Food",
                     "Should be consumed with caution. This food can be an occasional choice, but it should not be a mainstay in daily diet",
                     "High (10-20g per serving)",
                     "High (10-20g per serving, with some saturated fat)",
@@ -151,9 +151,9 @@ class HealthRecommendationHelper(
                 )
             }
 
-            (grade == "D").toString() -> {
+            "D" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "Unhealthy Food",
+                    "'D' Unhealthy Food",
                     "Not recommended for regular consumption. This food can contribute to health issues such as obesity, diabetes, and heart disease",
                     "Very high (more than 20g per serving)",
                     "Very high (more than 20g per serving, with high saturated fat)",
