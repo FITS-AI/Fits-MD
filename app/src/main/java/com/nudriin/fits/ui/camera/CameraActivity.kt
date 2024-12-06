@@ -74,7 +74,7 @@ class CameraActivity : AppCompatActivity() {
             context = this,
             onResult = { result ->
                 val summary = healthRecommendationHelper.recommendationSummary(result)
-                setAnalysisResult(summary)
+                setAnalysisResult(summary, result)
             },
             onError = { msg ->
                 showToast(this@CameraActivity, msg)
@@ -243,8 +243,12 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
-    private fun setAnalysisResult(summary: HealthRecommendationSummary) {
-        binding.tvGradeBottomSheet.text = "Grade: ${summary.grade}"
+    private fun setAnalysisResult(
+        summary: HealthRecommendationSummary,
+        analysisResult: String? = null
+    ) {
+        binding.tvGradeLabel.text = analysisResult ?: "!"
+        binding.tvGradeBottomSheet.text = summary.grade
         binding.tvOverallBottomSheet.text = summary.overall
 
         val layoutManager = LinearLayoutManager(this)

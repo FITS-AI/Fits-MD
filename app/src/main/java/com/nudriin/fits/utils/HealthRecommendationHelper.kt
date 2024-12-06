@@ -117,7 +117,7 @@ class HealthRecommendationHelper(
         when (grade) {
             "A" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "'A' Healthy Food",
+                    "Healthy Food",
                     "Excellent for health. This food is nutrient-dense and can help maintain weight and heart health",
                     "Low (less than 5g per serving)",
                     "Low (less than 5g per serving, with minimal saturated fat)",
@@ -129,7 +129,7 @@ class HealthRecommendationHelper(
 
             "B" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "'B' Good Food",
+                    "Good Food",
                     "Good for health. This food can be part of a balanced diet, although portion size and frequency of consumption should be monitored",
                     "Moderate (5-10g per serving)",
                     "Moderate (5-10g per serving, with controlled saturated fat)",
@@ -141,7 +141,7 @@ class HealthRecommendationHelper(
 
             "C" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "'C' Fair Food",
+                    "Fair Food",
                     "Should be consumed with caution. This food can be an occasional choice, but it should not be a mainstay in daily diet",
                     "High (10-20g per serving)",
                     "High (10-20g per serving, with some saturated fat)",
@@ -153,7 +153,7 @@ class HealthRecommendationHelper(
 
             "D" -> {
                 healthRecommendationSummary = HealthRecommendationSummary(
-                    "'D' Unhealthy Food",
+                    "Unhealthy Food",
                     "Not recommended for regular consumption. This food can contribute to health issues such as obesity, diabetes, and heart disease",
                     "Very high (more than 20g per serving)",
                     "Very high (more than 20g per serving, with high saturated fat)",
