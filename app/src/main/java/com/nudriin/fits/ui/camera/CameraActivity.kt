@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -33,7 +32,7 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
-import com.nudriin.fits.utils.HealthRecomendationHelper
+import com.nudriin.fits.utils.HealthRecommendationHelper
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -52,7 +51,7 @@ class CameraActivity : AppCompatActivity() {
     private var snapState = 1
     private lateinit var nutritionData: String
     private lateinit var compositionData: String
-    private lateinit var healthRecomendationHelper: HealthRecomendationHelper
+    private lateinit var healthRecommendationHelper: HealthRecommendationHelper
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +66,7 @@ class CameraActivity : AppCompatActivity() {
             insets
         }
 
-        healthRecomendationHelper = HealthRecomendationHelper(
+        healthRecommendationHelper = HealthRecommendationHelper(
             context = this,
             onResult = { result ->
                 binding.tvGradeBottomSheet.text = result
@@ -187,7 +186,7 @@ class CameraActivity : AppCompatActivity() {
                                         val inputValues =
                                             inputString.split(",").map { it.trim().toFloat() }
                                                 .toFloatArray()
-                                        healthRecomendationHelper.predict(inputValues)
+                                        healthRecommendationHelper.predict(inputValues)
                                         binding.tvOverallBottomSheet.text =
                                             "Composition: ${compositionData}"
                                         bottomSheetBehavior.state =
@@ -279,7 +278,7 @@ class CameraActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        healthRecomendationHelper.close()
+        healthRecommendationHelper.close()
     }
 
     companion object {

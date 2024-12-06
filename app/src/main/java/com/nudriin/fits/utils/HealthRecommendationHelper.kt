@@ -14,7 +14,7 @@ import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
-class HealthRecomendationHelper(
+class HealthRecommendationHelper(
     private val modelName: String = "model3.tflite",
     val context: Context,
     private val onResult: (String) -> Unit,
