@@ -80,7 +80,15 @@ class CameraActivity : AppCompatActivity() {
         healthRecommendationHelper = HealthRecommendationHelper(
             context = this,
             onResult = { result ->
-                val summary = healthRecommendationHelper.recommendationSummary(result)
+                var isDiabetes = false
+                appSettingsViewModel.getSettings().observe(
+                    this@CameraActivity
+                ) { settings ->
+                    isDiabetes = settings.diabetes
+                }
+
+                val summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
+
                 setAnalysisResult(summary, result)
             },
             onError = { msg ->
@@ -266,6 +274,11 @@ class CameraActivity : AppCompatActivity() {
         binding.tvGradeLabel.text = analysisResult ?: "!"
         binding.tvGradeBottomSheet.text = summary.grade
         binding.tvOverallBottomSheet.text = summary.overall
+        if (summary.warning.isNotEmpty()) {
+            binding.tvWarningBottomSheet.text = summary.warning
+        } else {
+            binding.tvWarningBottomSheet.visibility = View.GONE
+        }
 
         val layoutManager = LinearLayoutManager(this)
         binding.rvAnalysisResult.layoutManager = layoutManager
