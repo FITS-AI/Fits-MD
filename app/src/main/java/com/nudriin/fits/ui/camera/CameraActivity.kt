@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
@@ -25,14 +24,19 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
+import com.nudriin.fits.adapter.AnalysisAdapter
+import com.nudriin.fits.data.domain.HealthAnalysis
+import com.nudriin.fits.data.domain.HealthRecommendationSummary
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.utils.HealthRecommendationHelper
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -51,6 +55,7 @@ class CameraActivity : AppCompatActivity() {
     private var snapState = 1
     private lateinit var nutritionData: String
     private lateinit var compositionData: String
+    private lateinit var healthRecommendationHelper: HealthRecommendationHelper
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -64,6 +69,17 @@ class CameraActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+        healthRecommendationHelper = HealthRecommendationHelper(
+            context = this,
+            onResult = { result ->
+                val summary = healthRecommendationHelper.recommendationSummary(result)
+                setAnalysisResult(summary, result)
+            },
+            onError = { msg ->
+                showToast(this@CameraActivity, msg)
+            }
+        )
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
@@ -142,10 +158,6 @@ class CameraActivity : AppCompatActivity() {
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-//                    val intent = Intent()
-//                    intent.putExtra(EXTRA_CAMERAX_IMAGE, output.savedUri.toString())
-//                    setResult(CAMERAX_RESULT, intent)
-
                     when (snapState) {
                         1 -> {
                             showToast(this@CameraActivity, "Success get nutritional fact data!")
@@ -168,12 +180,16 @@ class CameraActivity : AppCompatActivity() {
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
                                         compositionData = detectedText
-                                        binding.tvGradeBottomSheet.text =
-                                            "Nutritional: ${nutritionData}"
-                                        binding.tvOverallBottomSheet.text =
-                                            "Composition: ${compositionData}"
+
+                                        // TODO( Change this with analysis result)
+                                        val inputString =
+                                            "0.0, 1.0, 1.1, 10.0" // Contoh input gula, lemak, protein, kalori
+                                        val inputValues =
+                                            inputString.split(",").map { it.trim().toFloat() }
+                                                .toFloatArray()
+                                        healthRecommendationHelper.predict(inputValues)
                                         bottomSheetBehavior.state =
-                                            BottomSheetBehavior.STATE_EXPANDED
+                                            BottomSheetBehavior.STATE_HALF_EXPANDED
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
                                     }
@@ -227,6 +243,28 @@ class CameraActivity : AppCompatActivity() {
         }
     }
 
+    private fun setAnalysisResult(
+        summary: HealthRecommendationSummary,
+        analysisResult: String? = null
+    ) {
+        binding.tvGradeLabel.text = analysisResult ?: "!"
+        binding.tvGradeBottomSheet.text = summary.grade
+        binding.tvOverallBottomSheet.text = summary.overall
+
+        val layoutManager = LinearLayoutManager(this)
+        binding.rvAnalysisResult.layoutManager = layoutManager
+
+        val sugar = HealthAnalysis("Sugar", summary.sugar)
+        val fat = HealthAnalysis("Fat", summary.fat)
+        val protein = HealthAnalysis("Protein", summary.protein)
+        val calories = HealthAnalysis("Calories", summary.calories)
+
+        val analysisList = listOf<HealthAnalysis>(sugar, fat, protein, calories)
+
+        val adapter = AnalysisAdapter(analysisList)
+        binding.rvAnalysisResult.adapter = adapter
+    }
+
     private fun showDialog(title: String, message: String) {
         val dialog = Dialog(this, R.style.CustomDialogTheme)
 
@@ -257,6 +295,11 @@ class CameraActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         orientationEventListener.disable()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        healthRecommendationHelper.close()
     }
 
     companion object {
