@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.nudriin.fits.databinding.FragmentAppSettingBinding
 
 class AppSettingFragment : Fragment() {
@@ -16,5 +17,17 @@ class AppSettingFragment : Fragment() {
     ): View {
         _binding = FragmentAppSettingBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupAction()
+    }
+
+    private fun setupAction() {
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
     }
 }

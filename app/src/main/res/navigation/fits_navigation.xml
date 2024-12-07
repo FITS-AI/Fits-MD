@@ -82,6 +82,9 @@
         <action
             android:id="@+id/action_profileFragment_to_allergyFragment"
             app:destination="@id/allergyFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_appSettingFragment"
+            app:destination="@id/appSettingFragment" />
     </fragment>
     <fragment
         android:id="@+id/allergyFragment"
@@ -92,4 +95,9 @@
             android:id="@+id/action_allergyFragment_to_profileFragment"
             app:destination="@id/profileFragment" />
     </fragment>
+    <fragment
+        android:id="@+id/appSettingFragment"
+        android:name="com.nudriin.fits.ui.appSettings.AppSettingFragment"
+        android:label="fragment_app_setting"
+        tools:layout="@layout/fragment_app_setting" />
 </navigation>
