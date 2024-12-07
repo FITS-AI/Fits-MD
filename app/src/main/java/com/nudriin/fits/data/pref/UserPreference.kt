@@ -44,16 +44,27 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             preferences.clear()
         }
     }
-
-    suspend fun saveSettings(settings: SettingsModel) {
+    
+    suspend fun saveTheme(darkMode: Boolean) {
         AppCompatDelegate.setDefaultNightMode(
-            if (settings.darkMode) AppCompatDelegate.MODE_NIGHT_YES
+            if (darkMode) AppCompatDelegate.MODE_NIGHT_YES
             else AppCompatDelegate.MODE_NIGHT_NO
         )
+
         dataStore.edit { preferences ->
-            preferences[DIABETES_KEY] = settings.diabetes
-            preferences[INSTRUCTION_KEY] = settings.instruction
-            preferences[DARK_MODE_KEY] = settings.darkMode
+            preferences[DARK_MODE_KEY] = darkMode
+        }
+    }
+
+    suspend fun saveDiabetes(isDiabetes: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[DIABETES_KEY] = isDiabetes
+        }
+    }
+
+    suspend fun saveInstruction(instruction: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[INSTRUCTION_KEY] = instruction
         }
     }
 
