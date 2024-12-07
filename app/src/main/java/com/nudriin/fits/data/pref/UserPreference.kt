@@ -23,6 +23,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             preferences[TOKEN_KEY] = user.token
             preferences[REFRESH_TOKEN_KEY] = user.refreshToken
             preferences[IS_LOGIN_KEY] = true
+            preferences[INSTRUCTION_KEY] = true
         }
     }
 

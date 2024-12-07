@@ -120,7 +120,6 @@ class CameraActivity : AppCompatActivity() {
     public override fun onResume() {
         super.onResume()
         setupView()
-//        hideSystemUI()
         startCamera()
     }
 
@@ -219,10 +218,6 @@ class CameraActivity : AppCompatActivity() {
         )
     }
 
-//    private fun hideSystemUI() {
-//
-//    }
-
     private fun setupView() {
         @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -305,7 +300,16 @@ class CameraActivity : AppCompatActivity() {
             dialog.cancel()
         }
 
-        dialog.show()
+        appSettingsViewModel.getSettings().observe(
+            this
+        ) { settings ->
+            if (settings.instruction) {
+                dialog.show()
+            } else {
+                dialog.hide()
+            }
+        }
+
     }
 
     override fun onStart() {
