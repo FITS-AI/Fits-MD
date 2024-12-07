@@ -156,6 +156,16 @@
                     android:fontFamily="@font/plus_jakarta_sans"
                     tools:text="Overall" />
 
+                <TextView
+                    android:id="@+id/tv_warning_bottom_sheet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:textSize="16sp"
+                    android:textAlignment="center"
+                    android:fontFamily="@font/plus_jakarta_sans"
+                    tools:text="Warning" />
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_analysis_result"
                     android:layout_width="match_parent"

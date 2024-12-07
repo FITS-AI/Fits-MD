@@ -43,4 +43,10 @@
     <string name="delete_allergy">Delete</string>
     <string name="your_allergies">Your allergies</string>
     <string name="data_not_found">Data not found</string>
+    <string name="have_diabetes">Have Diabetes</string>
+    <string name="have_diabetest_descriiption">Adjust the app\'s analysis based on the user\'s health profile</string>
+    <string name="camera_instruction">Camera Instruction</string>
+    <string name="camera_instruction_description">Enable guidance while using the camera for scanning</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="dark_mode_description">Switch to dark mode for a more comfortable visual experience</string>
 </resources>

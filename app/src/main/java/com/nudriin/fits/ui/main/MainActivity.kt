@@ -14,6 +14,7 @@ import com.nudriin.fits.databinding.ActivityMainBinding
 import android.Manifest
 import android.content.Intent
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.add
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,6 +22,7 @@ import com.nudriin.fits.R
 import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
+import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.ui.articlesList.ArticlesListFragment
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.home.HomeFragment
@@ -33,6 +35,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
+
+    private val appSettingsViewModel: AppSettingsViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
 
@@ -79,6 +85,19 @@ class MainActivity : AppCompatActivity() {
             requestPermissionLauncher.launch(REQUIRED_PERMISSION)
         }
 
+        setupView()
+    }
+
+    private fun setupView() {
+        appSettingsViewModel.getSettings().observe(
+            this
+        ) { settings ->
+            if (settings.darkMode) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
     }
 
     companion object {

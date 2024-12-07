@@ -59,7 +59,6 @@ class AllergyRepository private constructor(
             val response =
                 apiService.getUserById(
                     userPreference.getSession().first().token.toJWT(),
-                    userPreference.getSession().first().id
                 )
             emit(Result.Success(response))
         } catch (e: HttpException) {
