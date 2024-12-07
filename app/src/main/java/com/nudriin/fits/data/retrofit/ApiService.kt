@@ -4,6 +4,7 @@ import com.nudriin.fits.data.dto.allergy.AllergyGetAllResponse
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveRequest
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveResponse
 import com.nudriin.fits.data.dto.article.ArticleGetAllResponse
+import com.nudriin.fits.data.dto.product.ProductGetAllResponse
 import com.nudriin.fits.data.dto.user.UserGetByIdResponse
 import com.nudriin.fits.data.dto.user.UserLoginRequest
 import com.nudriin.fits.data.dto.user.UserLoginResponse
@@ -42,4 +43,7 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: AllergyUserSaveRequest
     ): AllergyUserSaveResponse
+
+    @GET("products")
+    suspend fun getAllProducts(@Header("Authorization") token: String): ProductGetAllResponse
 }
