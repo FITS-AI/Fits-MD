@@ -4,6 +4,7 @@ import android.content.Context
 import com.nudriin.fits.data.pref.UserPreference
 import com.nudriin.fits.data.pref.dataStore
 import com.nudriin.fits.data.repository.AllergyRepository
+import com.nudriin.fits.data.repository.AppSettingsRepository
 import com.nudriin.fits.data.repository.ArticleRepository
 import com.nudriin.fits.data.repository.AuthRepository
 import com.nudriin.fits.data.retrofit.ApiConfig
@@ -25,5 +26,10 @@ object Injection {
         val userPreference = UserPreference.getInstance(context.dataStore)
         val apiService = ApiConfig.getApiService()
         return AllergyRepository.getInstance(userPreference, apiService)
+    }
+
+    fun provideAppSettingsRepository(context: Context): AppSettingsRepository {
+        val userPreference = UserPreference.getInstance(context.dataStore)
+        return AppSettingsRepository.getInstance(userPreference)
     }
 }
