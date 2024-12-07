@@ -1,6 +1,7 @@
 package com.nudriin.fits.data.pref
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -22,6 +23,7 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             preferences[TOKEN_KEY] = user.token
             preferences[REFRESH_TOKEN_KEY] = user.refreshToken
             preferences[IS_LOGIN_KEY] = true
+            preferences[INSTRUCTION_KEY] = true
         }
     }
 
@@ -44,6 +46,34 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         }
     }
 
+    suspend fun saveTheme(darkMode: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[DARK_MODE_KEY] = darkMode
+        }
+    }
+
+    suspend fun saveDiabetes(isDiabetes: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[DIABETES_KEY] = isDiabetes
+        }
+    }
+
+    suspend fun saveInstruction(instruction: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[INSTRUCTION_KEY] = instruction
+        }
+    }
+
+    fun getSettings(): Flow<SettingsModel> {
+        return dataStore.data.map { preferences ->
+            SettingsModel(
+                preferences[DIABETES_KEY] ?: false,
+                preferences[INSTRUCTION_KEY] ?: false,
+                preferences[DARK_MODE_KEY] ?: false
+            )
+        }
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: UserPreference? = null
@@ -54,6 +84,10 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         private val TOKEN_KEY = stringPreferencesKey("token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refreshToken")
         private val IS_LOGIN_KEY = booleanPreferencesKey("isLogin")
+
+        private val DIABETES_KEY = booleanPreferencesKey("haveDiabetes")
+        private val INSTRUCTION_KEY = booleanPreferencesKey("popUpInstruction")
+        private val DARK_MODE_KEY = booleanPreferencesKey("darkMode")
 
         fun getInstance(dataStore: DataStore<Preferences>): UserPreference {
             return INSTANCE ?: synchronized(this) {

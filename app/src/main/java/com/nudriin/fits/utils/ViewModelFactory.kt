@@ -5,10 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.repository.AllergyRepository
+import com.nudriin.fits.data.repository.AppSettingsRepository
 import com.nudriin.fits.data.repository.ArticleRepository
 import com.nudriin.fits.data.repository.AuthRepository
 import com.nudriin.fits.di.Injection
 import com.nudriin.fits.ui.allergy.AllergyViewModel
+import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.ui.home.HomeViewModel
 import com.nudriin.fits.ui.login.LoginViewModel
 import com.nudriin.fits.ui.main.MainViewModel
@@ -18,6 +20,7 @@ class ViewModelFactory(
     private val authRepository: AuthRepository,
     private val articleRepository: ArticleRepository,
     private val allergyRepository: AllergyRepository,
+    private val appSettingsRepository: AppSettingsRepository
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -46,6 +49,10 @@ class ViewModelFactory(
                 AllergyViewModel(allergyRepository) as T
             }
 
+            modelClass.isAssignableFrom(AppSettingsViewModel::class.java) -> {
+                AppSettingsViewModel(appSettingsRepository) as T
+            }
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
     }
@@ -59,7 +66,8 @@ class ViewModelFactory(
                 val instance = ViewModelFactory(
                     Injection.provideAuthRepository(context),
                     Injection.provideArticleRepository(context),
-                    Injection.provideAllergyRepository(context)
+                    Injection.provideAllergyRepository(context),
+                    Injection.provideAppSettingsRepository(context)
                 )
                 INSTANCE = instance
                 instance

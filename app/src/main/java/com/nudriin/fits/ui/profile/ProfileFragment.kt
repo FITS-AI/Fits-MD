@@ -54,11 +54,20 @@ class ProfileFragment : Fragment() {
         binding.llHealthPreferences.setOnClickListener {
             moveToAllergy()
         }
+
+        binding.llAppSetting.setOnClickListener {
+            moveToAppSettings()
+        }
     }
 
     private fun moveToAllergy() {
         val toAllergy = ProfileFragmentDirections.actionProfileFragmentToAllergyFragment()
         Navigation.findNavController(binding.root).navigate(toAllergy)
+    }
+
+    private fun moveToAppSettings() {
+        val toAppSettings = ProfileFragmentDirections.actionProfileFragmentToAppSettingFragment()
+        Navigation.findNavController(binding.root).navigate(toAppSettings)
     }
 
 }
