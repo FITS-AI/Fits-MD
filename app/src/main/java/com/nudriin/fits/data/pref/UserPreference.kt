@@ -44,13 +44,8 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
             preferences.clear()
         }
     }
-    
-    suspend fun saveTheme(darkMode: Boolean) {
-        AppCompatDelegate.setDefaultNightMode(
-            if (darkMode) AppCompatDelegate.MODE_NIGHT_YES
-            else AppCompatDelegate.MODE_NIGHT_NO
-        )
 
+    suspend fun saveTheme(darkMode: Boolean) {
         dataStore.edit { preferences ->
             preferences[DARK_MODE_KEY] = darkMode
         }

@@ -14,7 +14,9 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.widget.FrameLayout
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
@@ -36,7 +38,9 @@ import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
+import com.nudriin.fits.utils.ViewModelFactory
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -56,6 +60,9 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var nutritionData: String
     private lateinit var compositionData: String
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
+    private val appSettingsViewModel: AppSettingsViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,7 +119,8 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-        hideSystemUI()
+        setupView()
+//        hideSystemUI()
         startCamera()
     }
 
@@ -211,7 +219,11 @@ class CameraActivity : AppCompatActivity() {
         )
     }
 
-    private fun hideSystemUI() {
+//    private fun hideSystemUI() {
+//
+//    }
+
+    private fun setupView() {
         @Suppress("DEPRECATION")
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             window.insetsController?.hide(WindowInsets.Type.statusBars())
@@ -222,6 +234,15 @@ class CameraActivity : AppCompatActivity() {
             )
         }
         supportActionBar?.hide()
+        appSettingsViewModel.getSettings().observe(
+            this
+        ) { settings ->
+            if (settings.darkMode) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
     }
 
     private val orientationEventListener by lazy {

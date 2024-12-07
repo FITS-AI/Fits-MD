@@ -29,12 +29,33 @@ class AppSettingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        setupView()
         setupAction()
+    }
+
+    private fun setupView() {
+        appSettingsViewModel.getSettings().observe(viewLifecycleOwner) { settings ->
+            binding.switchDarkMode.isChecked = settings.darkMode
+            binding.switchDiabetes.isChecked = settings.diabetes
+            binding.switchInstruction.isChecked = settings.instruction
+        }
     }
 
     private fun setupAction() {
         binding.backBtn.setOnClickListener {
             findNavController().navigateUp()
+        }
+
+        binding.switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            appSettingsViewModel.saveTheme(isChecked)
+        }
+
+        binding.switchDiabetes.setOnCheckedChangeListener { _, isChecked ->
+            appSettingsViewModel.saveDiabetes(isChecked)
+        }
+
+        binding.switchInstruction.setOnCheckedChangeListener { _, isChecked ->
+            appSettingsViewModel.saveInstruction(isChecked)
         }
     }
 }
