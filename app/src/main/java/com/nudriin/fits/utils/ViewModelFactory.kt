@@ -10,6 +10,7 @@ import com.nudriin.fits.data.repository.ArticleRepository
 import com.nudriin.fits.data.repository.AuthRepository
 import com.nudriin.fits.di.Injection
 import com.nudriin.fits.ui.allergy.AllergyViewModel
+import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.ui.home.HomeViewModel
 import com.nudriin.fits.ui.login.LoginViewModel
 import com.nudriin.fits.ui.main.MainViewModel
@@ -46,6 +47,10 @@ class ViewModelFactory(
 
             modelClass.isAssignableFrom(AllergyViewModel::class.java) -> {
                 AllergyViewModel(allergyRepository) as T
+            }
+
+            modelClass.isAssignableFrom(AppSettingsViewModel::class.java) -> {
+                AppSettingsViewModel(appSettingsRepository) as T
             }
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
