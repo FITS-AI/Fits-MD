@@ -1,6 +1,7 @@
 package com.nudriin.fits.data.pref
 
 import android.content.Context
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -44,6 +45,28 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         }
     }
 
+    suspend fun saveSettings(settings: SettingsModel) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (settings.darkMode) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
+        dataStore.edit { preferences ->
+            preferences[DIABETES_KEY] = settings.diabetes
+            preferences[INSTRUCTION_KEY] = settings.instruction
+            preferences[DARK_MODE_KEY] = settings.darkMode
+        }
+    }
+
+    fun getSettings(): Flow<SettingsModel> {
+        return dataStore.data.map { preferences ->
+            SettingsModel(
+                preferences[DIABETES_KEY] ?: false,
+                preferences[INSTRUCTION_KEY] ?: false,
+                preferences[DARK_MODE_KEY] ?: false
+            )
+        }
+    }
+
     companion object {
         @Volatile
         private var INSTANCE: UserPreference? = null
@@ -54,6 +77,10 @@ class UserPreference private constructor(private val dataStore: DataStore<Prefer
         private val TOKEN_KEY = stringPreferencesKey("token")
         private val REFRESH_TOKEN_KEY = stringPreferencesKey("refreshToken")
         private val IS_LOGIN_KEY = booleanPreferencesKey("isLogin")
+
+        private val DIABETES_KEY = booleanPreferencesKey("haveDiabetes")
+        private val INSTRUCTION_KEY = booleanPreferencesKey("popUpInstruction")
+        private val DARK_MODE_KEY = booleanPreferencesKey("darkMode")
 
         fun getInstance(dataStore: DataStore<Preferences>): UserPreference {
             return INSTANCE ?: synchronized(this) {
