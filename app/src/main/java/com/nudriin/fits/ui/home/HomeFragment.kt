@@ -19,6 +19,7 @@ import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.databinding.FragmentHomeBinding
 import com.nudriin.fits.ui.camera.CameraActivity
+import com.nudriin.fits.ui.home.HomeFragmentDirections
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -91,6 +92,10 @@ class HomeFragment : Fragment() {
         binding.ivHomeProfile.setOnClickListener {
             moveToProfile()
         }
+
+        binding.tvSeeAllHistory.setOnClickListener {
+            moveToScanHistory()
+        }
     }
 
     private fun setArticleList(articleList: List<ArticleItem>) {
@@ -134,6 +139,12 @@ class HomeFragment : Fragment() {
     private fun moveToProfile() {
         val toProfile = HomeFragmentDirections.actionHomeFragmentToProfileFragment()
         Navigation.findNavController(binding.root).navigate(toProfile)
+    }
+
+    private fun moveToScanHistory() {
+        val toScanHistory = HomeFragmentDirections.actionHomeFragmentToScanHistoryFragment()
+        Navigation.findNavController(binding.root).navigate(toScanHistory)
+
     }
 
     private fun startCameraX() {
