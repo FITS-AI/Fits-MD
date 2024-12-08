@@ -15,11 +15,15 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.R
 import com.nudriin.fits.adapter.ArticleAdapter
+import com.nudriin.fits.adapter.ScanHistoryAdapter
+import com.nudriin.fits.adapter.ScanHistoryHomeAdapter
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.data.dto.article.ArticleItem
+import com.nudriin.fits.data.dto.product.UserHistoryItem
 import com.nudriin.fits.databinding.FragmentHomeBinding
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.home.HomeFragmentDirections
+import com.nudriin.fits.ui.scanHistory.ScanHistoryViewModel
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -33,6 +37,10 @@ class HomeFragment : Fragment() {
         ViewModelFactory.getInstance(requireContext())
     }
     private val authViewModel: AuthViewModel by viewModels {
+        ViewModelFactory.getInstance(requireContext())
+    }
+
+    private val scanHistoryViewModel: ScanHistoryViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -59,6 +67,10 @@ class HomeFragment : Fragment() {
         val layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         binding.rvHomeArticle.layoutManager = layoutManager
 
+        val scanHistoryLayoutManager =
+            LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        binding.rvHomeHistory.layoutManager = scanHistoryLayoutManager
+
         homeViewModel.getAllArticle().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
@@ -68,6 +80,26 @@ class HomeFragment : Fragment() {
                 is Result.Success -> {
                     showLoading(false)
                     setArticleList(result.data.article)
+                }
+
+                is Result.Error -> {
+                    showLoading(false)
+                    result.error.getContentIfNotHandled().let { toastText ->
+                        showToast(requireContext(), toastText.toString())
+                    }
+                }
+            }
+        }
+
+        scanHistoryViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    setScanHistory(result.data.userHistory)
                 }
 
                 is Result.Error -> {
@@ -115,6 +147,15 @@ class HomeFragment : Fragment() {
             }
 
         })
+    }
+
+    private fun setScanHistory(scanHistory: List<UserHistoryItem>) {
+        binding.ivNotFound.visibility = View.GONE
+        binding.tvNotFound.visibility = View.GONE
+        binding.rvHomeHistory.visibility = View.VISIBLE
+        val histories = scanHistory.take(5)
+        val adapter = ScanHistoryHomeAdapter(histories)
+        binding.rvHomeHistory.adapter = adapter
     }
 
     private fun moveToArticleList() {
