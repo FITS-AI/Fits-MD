@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ScanHistoryAdapter
 import com.nudriin.fits.data.dto.product.UserHistoryItem
@@ -34,6 +35,7 @@ class ScanHistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupView()
+        setupAction()
     }
 
     private fun setupView() {
@@ -44,16 +46,16 @@ class ScanHistoryFragment : Fragment() {
         scanHistoryViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
-//                    showLoading(true)
+                    showLoading(true)
                 }
 
                 is Result.Success -> {
-//                    showLoading(false)
+                    showLoading(false)
                     setScanHistory(result.data.userHistory)
                 }
 
                 is Result.Error -> {
-//                    showLoading(false)
+                    showLoading(false)
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
@@ -62,9 +64,23 @@ class ScanHistoryFragment : Fragment() {
         }
     }
 
+    private fun setupAction() {
+        binding.backBtn.setOnClickListener {
+            findNavController().navigateUp()
+        }
+    }
+
     private fun setScanHistory(scanHistory: List<UserHistoryItem>) {
         val adapter = ScanHistoryAdapter(scanHistory)
         binding.rvScanHistory.adapter = adapter
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressBar.visibility = View.VISIBLE
+        } else {
+            binding.progressBar.visibility = View.GONE
+        }
     }
 
 }
