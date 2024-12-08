@@ -10,6 +10,7 @@ import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ScanHistoryAdapter
+import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.dto.product.UserHistoryItem
 import com.nudriin.fits.databinding.FragmentScanHistoryBinding
@@ -21,7 +22,7 @@ class ScanHistoryFragment : Fragment() {
     private var _binding: FragmentScanHistoryBinding? = null
     private val binding get() = _binding!!
 
-    private val scanHistoryViewModel: ScanHistoryViewModel by viewModels {
+    private val productViewModel: ProductViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -45,7 +46,7 @@ class ScanHistoryFragment : Fragment() {
         binding.rvScanHistory.layoutManager = layoutManager
 
 
-        scanHistoryViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
+        productViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
                     showLoading(true)

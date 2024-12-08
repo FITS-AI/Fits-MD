@@ -18,6 +18,7 @@ import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.adapter.ScanHistoryAdapter
 import com.nudriin.fits.adapter.ScanHistoryHomeAdapter
 import com.nudriin.fits.common.AuthViewModel
+import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.data.dto.product.UserHistoryItem
@@ -25,7 +26,6 @@ import com.nudriin.fits.databinding.FragmentHomeBinding
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.home.HomeFragmentDirections
 import com.nudriin.fits.ui.scanHistory.ScanHistoryFragmentDirections
-import com.nudriin.fits.ui.scanHistory.ScanHistoryViewModel
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
         ViewModelFactory.getInstance(requireContext())
     }
 
-    private val scanHistoryViewModel: ScanHistoryViewModel by viewModels {
+    private val productViewModel: ProductViewModel by viewModels {
         ViewModelFactory.getInstance(requireContext())
     }
 
@@ -93,7 +93,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        scanHistoryViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
+        productViewModel.getAllProduct().observe(viewLifecycleOwner) { result ->
             when (result) {
                 is Result.Loading -> {
                     showLoading(true)

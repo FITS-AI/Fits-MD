@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.nudriin.fits.common.AuthViewModel
+import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.repository.AllergyRepository
 import com.nudriin.fits.data.repository.AppSettingsRepository
 import com.nudriin.fits.data.repository.ArticleRepository
@@ -16,7 +17,6 @@ import com.nudriin.fits.ui.home.HomeViewModel
 import com.nudriin.fits.ui.login.LoginViewModel
 import com.nudriin.fits.ui.main.MainViewModel
 import com.nudriin.fits.ui.register.RegisterViewModel
-import com.nudriin.fits.ui.scanHistory.ScanHistoryViewModel
 
 class ViewModelFactory(
     private val authRepository: AuthRepository,
@@ -56,8 +56,8 @@ class ViewModelFactory(
                 AppSettingsViewModel(appSettingsRepository) as T
             }
 
-            modelClass.isAssignableFrom(ScanHistoryViewModel::class.java) -> {
-                ScanHistoryViewModel(productRepository) as T
+            modelClass.isAssignableFrom(ProductViewModel::class.java) -> {
+                ProductViewModel(productRepository) as T
             }
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
