@@ -57,12 +57,17 @@ class ScanHistoryFragment : Fragment() {
                         binding.rvScanHistory.visibility = View.VISIBLE
                         binding.ivNotFound.visibility = View.GONE
                         binding.tvNotFound.visibility = View.GONE
+                    } else {
+                        binding.ivNotFound.visibility = View.VISIBLE
+                        binding.tvNotFound.visibility = View.VISIBLE
                     }
                     setScanHistory(result.data.userHistory)
                 }
 
                 is Result.Error -> {
                     showLoading(false)
+                    binding.ivNotFound.visibility = View.VISIBLE
+                    binding.tvNotFound.visibility = View.VISIBLE
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(requireContext(), toastText.toString())
                     }
