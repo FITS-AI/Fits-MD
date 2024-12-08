@@ -3,11 +3,31 @@ package com.nudriin.fits.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.dto.product.UserHistoryItem
 import com.nudriin.fits.databinding.ScanHistoryHomeCardBinding
 
 class ScanHistoryHomeAdapter(private val scanHistoryList: List<UserHistoryItem>) :
     RecyclerView.Adapter<ScanHistoryHomeAdapter.ViewHolder>() {
+
+    private lateinit var onItemClickCallback: OnItemClickCallback
+
+    interface OnItemClickCallback {
+        fun onItemClicked(
+            label: String,
+            name: String,
+            overall: String,
+            sugar: HealthAnalysis,
+            fat: HealthAnalysis,
+            protein: HealthAnalysis,
+            calories: HealthAnalysis
+        )
+    }
+
+    fun setOnItemClickCallback(onItemClickCallback: OnItemClickCallback) {
+        this.onItemClickCallback = onItemClickCallback
+    }
+
     class ViewHolder(private val binding: ScanHistoryHomeCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -30,5 +50,16 @@ class ScanHistoryHomeAdapter(private val scanHistoryList: List<UserHistoryItem>)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val scanHistory = scanHistoryList[position]
         holder.bind(scanHistory)
+        holder.itemView.setOnClickListener {
+            onItemClickCallback.onItemClicked(
+                label = scanHistory.product.grade.gradeName,
+                name = scanHistory.product.name,
+                overall = scanHistory.product.grade.gradeDesc,
+                sugar = HealthAnalysis("Sugar", scanHistory.product.sugar),
+                fat = HealthAnalysis("Sugar", scanHistory.product.fat),
+                protein = HealthAnalysis("Sugar", scanHistory.product.protein),
+                calories = HealthAnalysis("Sugar", scanHistory.product.calories)
+            )
+        }
     }
 }
