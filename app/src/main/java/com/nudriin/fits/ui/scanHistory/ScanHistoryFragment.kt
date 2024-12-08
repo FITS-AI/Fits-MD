@@ -6,9 +6,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nudriin.fits.adapter.ScanHistoryAdapter
+import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.dto.product.UserHistoryItem
 import com.nudriin.fits.databinding.FragmentScanHistoryBinding
 import com.nudriin.fits.utils.Result
@@ -78,6 +80,37 @@ class ScanHistoryFragment : Fragment() {
     private fun setScanHistory(scanHistory: List<UserHistoryItem>) {
         val adapter = ScanHistoryAdapter(scanHistory)
         binding.rvScanHistory.adapter = adapter
+        adapter.setOnItemClickCallback(object : ScanHistoryAdapter.OnItemClickCallback {
+            override fun onItemClicked(
+                label: String,
+                name: String,
+                overall: String,
+                sugar: HealthAnalysis,
+                fat: HealthAnalysis,
+                protein: HealthAnalysis,
+                calories: HealthAnalysis
+            ) {
+                moveToScanHistoryDetail(label, name, overall, sugar, fat, protein, calories)
+            }
+
+        })
+    }
+
+    private fun moveToScanHistoryDetail(
+        label: String,
+        name: String,
+        overall: String,
+        sugar: HealthAnalysis,
+        fat: HealthAnalysis,
+        protein: HealthAnalysis,
+        calories: HealthAnalysis
+    ) {
+        val toDetail =
+            ScanHistoryFragmentDirections.actionScanHistoryFragmentToScanHistoryDetailFragment(
+                label, name, overall, sugar, fat, protein, calories
+            )
+
+        Navigation.findNavController(binding.root).navigate(toDetail)
     }
 
     private fun showLoading(isLoading: Boolean) {

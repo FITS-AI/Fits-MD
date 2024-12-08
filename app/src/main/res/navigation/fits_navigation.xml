@@ -79,8 +79,7 @@
             app:argType="string" />
         <argument
             android:name="name"
-            app:argType="string"
-            android:defaultValue='"Untitled"' />
+            app:argType="string" />
         <argument
             android:name="overall"
             app:argType="string" />
