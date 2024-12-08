@@ -18,11 +18,13 @@ import com.nudriin.fits.adapter.ArticleAdapter
 import com.nudriin.fits.adapter.ScanHistoryAdapter
 import com.nudriin.fits.adapter.ScanHistoryHomeAdapter
 import com.nudriin.fits.common.AuthViewModel
+import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.dto.article.ArticleItem
 import com.nudriin.fits.data.dto.product.UserHistoryItem
 import com.nudriin.fits.databinding.FragmentHomeBinding
 import com.nudriin.fits.ui.camera.CameraActivity
 import com.nudriin.fits.ui.home.HomeFragmentDirections
+import com.nudriin.fits.ui.scanHistory.ScanHistoryFragmentDirections
 import com.nudriin.fits.ui.scanHistory.ScanHistoryViewModel
 import com.nudriin.fits.ui.welcome.WelcomeActivity
 import com.nudriin.fits.utils.Result
@@ -163,6 +165,20 @@ class HomeFragment : Fragment() {
         val histories = scanHistory.take(5)
         val adapter = ScanHistoryHomeAdapter(histories)
         binding.rvHomeHistory.adapter = adapter
+        adapter.setOnItemClickCallback(object : ScanHistoryHomeAdapter.OnItemClickCallback {
+            override fun onItemClicked(
+                label: String,
+                name: String,
+                overall: String,
+                sugar: HealthAnalysis,
+                fat: HealthAnalysis,
+                protein: HealthAnalysis,
+                calories: HealthAnalysis
+            ) {
+                moveToScanHistoryDetail(label, name, overall, sugar, fat, protein, calories)
+            }
+
+        })
     }
 
     private fun moveToArticleList() {
@@ -192,7 +208,23 @@ class HomeFragment : Fragment() {
     private fun moveToScanHistory() {
         val toScanHistory = HomeFragmentDirections.actionHomeFragmentToScanHistoryFragment()
         Navigation.findNavController(binding.root).navigate(toScanHistory)
+    }
 
+    private fun moveToScanHistoryDetail(
+        label: String,
+        name: String,
+        overall: String,
+        sugar: HealthAnalysis,
+        fat: HealthAnalysis,
+        protein: HealthAnalysis,
+        calories: HealthAnalysis
+    ) {
+        val toDetail =
+            HomeFragmentDirections.actionHomeFragmentToScanHistoryDetailFragment(
+                label, name, overall, sugar, fat, protein, calories
+            )
+
+        Navigation.findNavController(binding.root).navigate(toDetail)
     }
 
     private fun startCameraX() {
