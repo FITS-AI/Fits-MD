@@ -58,6 +58,10 @@ class ProfileFragment : Fragment() {
         binding.llAppSetting.setOnClickListener {
             moveToAppSettings()
         }
+
+        binding.llScanHistory.setOnClickListener {
+            moveToScanHistory()
+        }
     }
 
     private fun moveToAllergy() {
@@ -68,6 +72,11 @@ class ProfileFragment : Fragment() {
     private fun moveToAppSettings() {
         val toAppSettings = ProfileFragmentDirections.actionProfileFragmentToAppSettingFragment()
         Navigation.findNavController(binding.root).navigate(toAppSettings)
+    }
+
+    private fun moveToScanHistory() {
+        val toScanHistory = ProfileFragmentDirections.actionProfileFragmentToScanHistoryFragment()
+        Navigation.findNavController(binding.root).navigate(toScanHistory)
     }
 
 }

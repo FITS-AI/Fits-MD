@@ -85,6 +85,9 @@
         <action
             android:id="@+id/action_profileFragment_to_appSettingFragment"
             app:destination="@id/appSettingFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_scanHistoryFragment"
+            app:destination="@id/scanHistoryFragment" />
     </fragment>
     <fragment
         android:id="@+id/allergyFragment"
