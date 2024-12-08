@@ -46,9 +46,9 @@
 
         <LinearLayout
             android:id="@+id/ll_scan_history_label"
-            android:layout_width="145dp"
+            android:layout_width="100dp"
             android:layout_height="match_parent"
-            android:background="@color/lime"
+            android:background="?attr/colorPrimary"
             android:orientation="vertical"
             card_view:layout_constraintBottom_toBottomOf="parent"
             card_view:layout_constraintEnd_toEndOf="parent"
