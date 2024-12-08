@@ -49,4 +49,6 @@
     <string name="camera_instruction_description">Enable guidance while using the camera for scanning</string>
     <string name="dark_mode">Dark Mode</string>
     <string name="dark_mode_description">Switch to dark mode for a more comfortable visual experience</string>
+    <string name="save_product">Save Product</string>
+    <string name="product_name">Product Name</string>
 </resources>
