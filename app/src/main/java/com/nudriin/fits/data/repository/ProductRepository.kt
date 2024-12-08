@@ -3,6 +3,7 @@ package com.nudriin.fits.data.repository
 import androidx.lifecycle.liveData
 import com.google.gson.Gson
 import com.nudriin.fits.data.dto.error.ErrorResponse
+import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.data.pref.UserPreference
 import com.nudriin.fits.data.retrofit.ApiService
 import com.nudriin.fits.utils.Event
@@ -21,6 +22,21 @@ class ProductRepository private constructor(
         try {
             val response =
                 apiService.getAllProducts(userPreference.getSession().first().token.toJWT())
+            emit(Result.Success(response))
+        } catch (e: HttpException) {
+            val response = e.response()?.errorBody()?.string()
+            val body = Gson().fromJson(response, ErrorResponse::class.java)
+            emit(Result.Error(Event(body.message)))
+        } catch (e: Exception) {
+            emit(Result.Error(Event(e.message ?: "An error occurred")))
+        }
+    }
+
+    fun saveProduct(request: ProductSaveRequest) = liveData {
+        emit(Result.Loading)
+        try {
+            val response =
+                apiService.saveProducts(userPreference.getSession().first().token.toJWT(), request)
             emit(Result.Success(response))
         } catch (e: HttpException) {
             val response = e.response()?.errorBody()?.string()
