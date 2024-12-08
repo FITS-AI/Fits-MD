@@ -51,6 +51,11 @@ class ScanHistoryFragment : Fragment() {
 
                 is Result.Success -> {
                     showLoading(false)
+                    if (result.data.userHistory.isNotEmpty()) {
+                        binding.rvScanHistory.visibility = View.VISIBLE
+                        binding.ivNotFound.visibility = View.GONE
+                        binding.tvNotFound.visibility = View.GONE
+                    }
                     setScanHistory(result.data.userHistory)
                 }
 

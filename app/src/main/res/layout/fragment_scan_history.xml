@@ -23,7 +23,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible"
         android:translationZ="1dp" />
-    
+
     <RelativeLayout
         android:id="@+id/rl_header"
         android:layout_width="0dp"
@@ -59,9 +59,36 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="25dp"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/rl_header"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/scan_history_card" />
+
+    <ImageView
+        android:id="@+id/iv_not_found"
+        android:layout_width="110dp"
+        android:layout_height="110dp"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/not_found"
+        android:layout_gravity="center_horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_not_found"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/plus_jakarta_sans_bold"
+        android:textSize="16sp"
+        android:textAlignment="center"
+        android:text="@string/data_not_found"
+        android:textColor="@color/ash"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/iv_not_found" />
 </androidx.constraintlayout.widget.ConstraintLayout>

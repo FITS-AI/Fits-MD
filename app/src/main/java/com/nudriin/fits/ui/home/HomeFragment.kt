@@ -99,6 +99,11 @@ class HomeFragment : Fragment() {
 
                 is Result.Success -> {
                     showLoading(false)
+                    if (result.data.userHistory.isNotEmpty()) {
+                        binding.rvHomeHistory.visibility = View.VISIBLE
+                        binding.ivNotFound.visibility = View.GONE
+                        binding.tvNotFound.visibility = View.GONE
+                    }
                     setScanHistory(result.data.userHistory)
                 }
 
@@ -150,9 +155,6 @@ class HomeFragment : Fragment() {
     }
 
     private fun setScanHistory(scanHistory: List<UserHistoryItem>) {
-        binding.ivNotFound.visibility = View.GONE
-        binding.tvNotFound.visibility = View.GONE
-        binding.rvHomeHistory.visibility = View.VISIBLE
         val histories = scanHistory.take(5)
         val adapter = ScanHistoryHomeAdapter(histories)
         binding.rvHomeHistory.adapter = adapter
