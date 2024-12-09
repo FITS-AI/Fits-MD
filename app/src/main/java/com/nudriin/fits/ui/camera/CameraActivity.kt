@@ -37,11 +37,16 @@ import com.nudriin.fits.adapter.AnalysisAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
+import com.nudriin.fits.data.dto.allergy.AllergyItem
+import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.databinding.DialogEditTextBinding
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
+import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
+import com.nudriin.fits.utils.getGradeId
 import com.nudriin.fits.utils.showToast
 import java.io.File
 import java.text.SimpleDateFormat
@@ -51,6 +56,7 @@ import java.util.Locale
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private lateinit var dialogBinding: DialogCameraBinding
+    private lateinit var dialogSaveProductBinding: DialogEditTextBinding
     private var imageCapture: ImageCapture? = null
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
@@ -67,6 +73,8 @@ class CameraActivity : AppCompatActivity() {
     private val productViewModel: ProductViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
+    private var summary: HealthRecommendationSummary? = null
+    private var analysisGrade: String? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +82,7 @@ class CameraActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityCameraBinding.inflate(layoutInflater)
         dialogBinding = DialogCameraBinding.inflate(layoutInflater)
+        dialogSaveProductBinding = DialogEditTextBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -81,12 +90,13 @@ class CameraActivity : AppCompatActivity() {
             insets
         }
 
+        setupView()
+        setupAction()
     }
 
     public override fun onResume() {
         super.onResume()
-        setupView()
-        setupAction()
+
     }
 
 
@@ -125,7 +135,7 @@ class CameraActivity : AppCompatActivity() {
 
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        binding.progressIndicator.visibility = View.VISIBLE
+        showLoading(true)
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
@@ -139,7 +149,7 @@ class CameraActivity : AppCompatActivity() {
                             val title = getString(R.string.instruction, "Two")
                             val message = getString(R.string.composition_instruction)
                             showDialog(title, message)
-                            binding.progressIndicator.visibility = View.GONE
+                            showLoading(false)
                         }
 
                         2 -> {
@@ -166,10 +176,10 @@ class CameraActivity : AppCompatActivity() {
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
                                     }
-                                    binding.progressIndicator.visibility = View.GONE
+                                    showLoading(false)
                                 }
                                 .addOnFailureListener {
-                                    binding.progressIndicator.visibility = View.GONE
+                                    showLoading(false)
                                     showToast(this@CameraActivity, "An error occurred!")
                                 }
                         }
@@ -216,9 +226,11 @@ class CameraActivity : AppCompatActivity() {
                     isDiabetes = settings.diabetes
                 }
 
-                val summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
+                analysisGrade = result
 
-                setAnalysisResult(summary, result)
+                summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
+
+                setAnalysisResult(summary!!, result)
             },
             onError = { msg ->
                 showToast(this@CameraActivity, msg)
@@ -255,6 +267,10 @@ class CameraActivity : AppCompatActivity() {
 
         binding.captureImage.setOnClickListener {
             takePhoto()
+        }
+
+        binding.btnSaveHistory.setOnClickListener {
+            showSaveProductDialog()
         }
     }
 
@@ -333,6 +349,74 @@ class CameraActivity : AppCompatActivity() {
             }
         }
 
+    }
+
+    private fun showSaveProductDialog() {
+        val dialog = Dialog(this, R.style.CustomDialogTheme)
+
+        if (dialogBinding.root.parent != null) {
+            (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
+        }
+
+        dialog.setContentView(dialogSaveProductBinding.root)
+        dialog.setCanceledOnTouchOutside(false)
+
+        dialogSaveProductBinding.btnClose.setOnClickListener {
+            dialog.cancel()
+        }
+
+        dialogSaveProductBinding.btnSave.setOnClickListener {
+            val productName = dialogSaveProductBinding.edtProductName.text.toString()
+
+            val request = ProductSaveRequest(
+                gradesId = getGradeId(analysisGrade!!)!!,
+                name = productName,
+                calories = summary!!.calories,
+                caloriesIng = "sugar, flour",
+                protein = summary!!.protein,
+                proteinIng = "soy, milk",
+                fat = summary!!.fat,
+                fatIng = "butter, cream",
+                fiber = "2 g",
+                fiberIng = "oats, flaxseed",
+                carbo = "20 g",
+                carboIng = "wheat, rice",
+                sugar = summary!!.sugar,
+                sugarIng = "sucrose, honey",
+                allergy = listOf()
+            )
+
+            productViewModel.saveProduct(request).observe(this) { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        showLoading(true)
+                    }
+
+                    is Result.Success -> {
+                        showLoading(false)
+                        showToast(this, result.data.message)
+                        finish()
+                    }
+
+                    is Result.Error -> {
+                        showLoading(false)
+                        result.error.getContentIfNotHandled().let { toastText ->
+                            showToast(this, toastText.toString())
+                        }
+                    }
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun showLoading(isLoading: Boolean) {
+        if (isLoading) {
+            binding.progressIndicator.visibility = View.VISIBLE
+        } else {
+            binding.progressIndicator.visibility = View.GONE
+        }
     }
 
     override fun onStart() {
