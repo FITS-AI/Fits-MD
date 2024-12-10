@@ -2,6 +2,9 @@ package com.nudriin.fits.ui.camera
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.camera.core.Camera
 import android.os.Build
 import android.os.Bundle
@@ -44,10 +47,12 @@ import com.nudriin.fits.databinding.DialogCameraBinding
 import com.nudriin.fits.databinding.DialogEditTextBinding
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
+import com.nudriin.fits.utils.OcrHelper
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 import com.nudriin.fits.utils.getGradeId
 import com.nudriin.fits.utils.showToast
+import org.tensorflow.lite.task.gms.vision.detector.Detection
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -75,6 +80,7 @@ class CameraActivity : AppCompatActivity() {
     }
     private var summary: HealthRecommendationSummary? = null
     private var analysisGrade: String? = null
+    private lateinit var ocrHelper: OcrHelper
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +102,6 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-
     }
 
 
@@ -143,8 +148,10 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     when (snapState) {
                         1 -> {
-                            showToast(this@CameraActivity, "Success get nutritional fact data!")
-                            nutritionData = "Data Gizi Berhasil di ekstrak"
+                            val bitmapImage = uriToBitmap(output.savedUri!!)
+                            ocrHelper.detectObject(bitmapImage!!)
+//                            showToast(this@CameraActivity, "Success get nutritional fact data!")
+//                            nutritionData = "Data Gizi Berhasil di ekstrak"
                             snapState = 2
                             val title = getString(R.string.instruction, "Two")
                             val message = getString(R.string.composition_instruction)
@@ -246,6 +253,27 @@ class CameraActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
         }
+
+        ocrHelper = OcrHelper(
+            context = this@CameraActivity,
+            detectorListener = object : OcrHelper.DetectorListener {
+                override fun onError(error: String) {
+                    Log.d("CameraOCRError", error)
+                }
+
+                override fun onResults(
+                    results: String,
+                    inferenceTime: Long,
+                    imageHeight: Int,
+                    imageWidth: Int
+                ) {
+                    Log.d("OCR_CAMERA_RES", results)
+                    showToast(this@CameraActivity, results)
+                    binding.tvOverallBottomSheet.text = results
+                }
+
+            }
+        )
     }
 
     private fun setupAction() {
@@ -299,7 +327,7 @@ class CameraActivity : AppCompatActivity() {
     ) {
         binding.tvGradeLabel.text = analysisResult ?: "!"
         binding.tvGradeBottomSheet.text = summary.grade
-        binding.tvOverallBottomSheet.text = summary.overall
+//        binding.tvOverallBottomSheet.text = summary.overall
         if (summary.warning.isNotEmpty()) {
             binding.tvWarningBottomSheet.text = summary.warning
         } else {
@@ -432,6 +460,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         healthRecommendationHelper.close()
+        ocrHelper.close()
     }
 
     companion object {
@@ -444,5 +473,19 @@ class CameraActivity : AppCompatActivity() {
     private fun createCustomTempFile(context: Context): File {
         val filesDir = context.externalCacheDir
         return File.createTempFile(timeStamp, ".jpg", filesDir)
+    }
+
+    private fun uriToBitmap(imageUri: Uri): Bitmap? {
+        return try {
+            val bitmapImage = this.contentResolver
+                .openInputStream(imageUri)?.use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
+                }
+
+            bitmapImage
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
     }
 }
