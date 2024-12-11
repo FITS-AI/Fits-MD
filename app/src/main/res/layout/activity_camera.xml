@@ -32,6 +32,7 @@
             android:layout_height="match_parent" />
 
         <ImageView
+            android:id="@+id/iv_camera_overlay"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/camera_overlay"
@@ -39,6 +40,26 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
+
+        <!--        <com.nudriin.fits.customView.OverlayView-->
+        <!--            android:id="@+id/overlay"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="match_parent"-->
+        <!--            android:translationZ="40dp"-->
+        <!--            android:elevation="10dp"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent" />-->
+
+        <!--        <ImageView-->
+        <!--            android:id="@+id/iv_bbox"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            app:layout_constraintTop_toTopOf="parent"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--            app:layout_constraintStart_toStartOf="parent"-->
+        <!--            app:layout_constraintEnd_toEndOf="parent" />-->
 
         <ImageView
             android:id="@+id/captureImage"
