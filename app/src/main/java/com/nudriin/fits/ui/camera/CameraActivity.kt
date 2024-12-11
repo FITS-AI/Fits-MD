@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Rect
 import android.net.Uri
 import androidx.camera.core.Camera
 import android.os.Build
@@ -41,7 +40,9 @@ import com.nudriin.fits.adapter.AnalysisAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
-import com.nudriin.fits.data.dto.allergy.AllergyItem
+import com.nudriin.fits.data.dto.gemini.Contents
+import com.nudriin.fits.data.dto.gemini.GeminiRequest
+import com.nudriin.fits.data.dto.gemini.Part
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
@@ -53,7 +54,6 @@ import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 import com.nudriin.fits.utils.getGradeId
 import com.nudriin.fits.utils.showToast
-import org.tensorflow.lite.task.gms.vision.detector.Detection
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -153,6 +153,94 @@ class CameraActivity : AppCompatActivity() {
                         1 -> {
                             bitmapImage = uriToBitmap(output.savedUri!!)!!
                             ocrHelper.detectObject(bitmapImage)
+                            val textRecognizer =
+                                TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                            val inputImage: InputImage =
+                                InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+
+                            textRecognizer.process(inputImage)
+                                .addOnSuccessListener { visionText: Text ->
+                                    val detectedText: String = visionText.text
+                                    if (detectedText.isNotBlank()) {
+                                        compositionData = detectedText
+
+                                        val request = GeminiRequest(
+                                            listOf(
+                                                Contents(
+                                                    listOf(
+                                                        Part(
+                                                            "OCR Result: $detectedText Anda adalah asisten ahli gizi yang bertugas mengekstraksi informasi nutrisi dari teks OCR yang tidak teratur. Ikuti instruksi berikut dengan cermat:\n" +
+                                                                    "\n" +
+                                                                    "1. Bersihkan teks input dengan menghapus semua data yang tidak terkait dengan nutrition label.\n" +
+                                                                    "\n" +
+                                                                    "2. Fokus pada mengekstraksi nilai-nilai spesifik berikut:\n" +
+                                                                    "- Sugar (dalam gram)\n" +
+                                                                    "- Calories (dalam kkal)\n" +
+                                                                    "- Fat (dalam gram)\n" +
+                                                                    "- Protein (dalam gram)\n" +
+                                                                    "\n" +
+                                                                    "3. Jika suatu nilai tidak dapat ditemukan, gunakan 0 sebagai default.\n" +
+                                                                    "\n" +
+                                                                    "4. Lakukan analisis kesehatan singkat berdasarkan nilai nutrisi yang ditemukan. Pertimbangkan:\n" +
+                                                                    "- Apakah kandungan gula terlalu tinggi?\n" +
+                                                                    "- Keseimbangan nutrisi protein, lemak, dan kalori\n" +
+                                                                    "- Potensi dampak kesehatan dari komposisi nutrisi\n" +
+                                                                    "\n" +
+                                                                    "5. Kembalikan output HANYA dalam format String JSON berikut:\n" +
+                                                                    "{\n" +
+                                                                    "    \"analysis\": \"Analisis kesehatan dalam 1-2 kalimat\",\n" +
+                                                                    "    \"sugar\": float,\n" +
+                                                                    "    \"calories\": float,\n" +
+                                                                    "    \"fat\": float, \n" +
+                                                                    "    \"protein\": float\n" +
+                                                                    "}" +
+                                                                    "6. Kembalikan JSON hanya dalam format string tanpa markdown"
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        )
+
+                                        productViewModel.generateContent(request)
+                                            .observe(this@CameraActivity) { result ->
+                                                when (result) {
+                                                    is Result.Loading -> {
+                                                        showLoading(true)
+                                                    }
+
+                                                    is Result.Success -> {
+                                                        showLoading(false)
+                                                        showToast(
+                                                            this@CameraActivity,
+                                                            result.data.candidates.first().content.parts.first().text
+                                                        )
+                                                        Log.d(
+                                                            "GEMINI_RESULT",
+                                                            result.data.candidates.first().content.parts.first().text
+                                                        )
+                                                    }
+
+                                                    is Result.Error -> {
+                                                        showLoading(false)
+                                                        result.error.getContentIfNotHandled()
+                                                            .let { toastText ->
+                                                                showToast(
+                                                                    this@CameraActivity,
+                                                                    toastText.toString()
+                                                                )
+                                                            }
+                                                    }
+                                                }
+                                            }
+                                    } else {
+                                        showToast(this@CameraActivity, "An error occurred!")
+                                    }
+                                    showLoading(false)
+                                }
+                                .addOnFailureListener {
+                                    showLoading(false)
+                                    showToast(this@CameraActivity, "An error occurred!")
+                                }
                             snapState = 2
                             val title = getString(R.string.instruction, "Two")
                             val message = getString(R.string.composition_instruction)
