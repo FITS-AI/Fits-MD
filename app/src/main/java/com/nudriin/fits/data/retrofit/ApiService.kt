@@ -1,9 +1,12 @@
 package com.nudriin.fits.data.retrofit
 
+import com.nudriin.fits.BuildConfig
 import com.nudriin.fits.data.dto.allergy.AllergyGetAllResponse
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveRequest
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveResponse
 import com.nudriin.fits.data.dto.article.ArticleGetAllResponse
+import com.nudriin.fits.data.dto.gemini.GeminiRequest
+import com.nudriin.fits.data.dto.gemini.GeminiResponse
 import com.nudriin.fits.data.dto.product.ProductGetAllResponse
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.data.dto.product.ProductSaveResponse
@@ -54,4 +57,9 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: ProductSaveRequest
     ): ProductSaveResponse
+
+    @POST("?key=${BuildConfig.GEMINI_TOKEN_KEY}")
+    suspend fun generateContent(
+        @Body request: GeminiRequest
+    ): GeminiResponse
 }
