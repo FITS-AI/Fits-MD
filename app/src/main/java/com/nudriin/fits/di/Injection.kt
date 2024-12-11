@@ -37,6 +37,7 @@ object Injection {
     fun provideProductRepository(context: Context): ProductRepository {
         val userPreference = UserPreference.getInstance(context.dataStore)
         val apiService = ApiConfig.getApiService()
-        return ProductRepository.getInstance(userPreference, apiService)
+        val geminiApiService = ApiConfig.getGeminiApiService()
+        return ProductRepository.getInstance(userPreference, apiService, geminiApiService)
     }
 }
