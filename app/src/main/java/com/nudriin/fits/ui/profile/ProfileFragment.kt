@@ -1,5 +1,6 @@
 package com.nudriin.fits.ui.profile
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -11,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import com.nudriin.fits.R
 import com.nudriin.fits.common.AuthViewModel
 import com.nudriin.fits.databinding.FragmentProfileBinding
+import com.nudriin.fits.ui.main.MainActivity
 import com.nudriin.fits.utils.ViewModelFactory
 
 class ProfileFragment : Fragment() {
@@ -48,7 +50,9 @@ class ProfileFragment : Fragment() {
         }
 
         binding.backBtn.setOnClickListener {
-            findNavController().navigateUp()
+            val intent = Intent(requireContext(), MainActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK
+            requireContext().startActivity(intent)
         }
 
         binding.llHealthPreferences.setOnClickListener {
