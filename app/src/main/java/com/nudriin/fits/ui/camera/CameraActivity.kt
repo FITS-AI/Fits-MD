@@ -159,7 +159,7 @@ class CameraActivity : AppCompatActivity() {
                         1 -> {
                             val croppedUri = cropImage(output.savedUri!!)
                             bitmapImage =
-                                MediaStore.Images.Media.getBitmap(contentResolver, croppedUri)
+                                MediaStore.Images.Media.getBitmap(contentResolver, output.savedUri)
                             ocrHelper.detectObject(bitmapImage)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
@@ -295,13 +295,13 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onResults(
                     results: FloatArray,
-                    inferenceTime: Long,
                     imageHeight: Int,
                     imageWidth: Int,
                     boundingImg: Bitmap?
                 ) {
                     runOnUiThread {
                         Log.d("OCR_CAMERA_RES", results.joinToString())
+                        binding.ivCameraOverlay.setImageBitmap(boundingImg)
                     }
                 }
 
