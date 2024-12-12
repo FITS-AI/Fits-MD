@@ -1,6 +1,8 @@
 package com.nudriin.fits.data.retrofit
 
 import com.nudriin.fits.BuildConfig
+import com.nudriin.fits.data.domain.CommonResponse
+import com.nudriin.fits.data.dto.allergy.AllergyDeleteRequest
 import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.dto.allergy.AllergyDetectResponse
 import com.nudriin.fits.data.dto.allergy.AllergyGetAllResponse
@@ -21,7 +23,11 @@ import com.nudriin.fits.data.dto.user.UserSaveRequest
 import com.nudriin.fits.data.dto.user.UserSaveResponse
 import retrofit2.Call
 import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.HTTP
 import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -52,6 +58,12 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: AllergyUserSaveRequest
     ): AllergyUserSaveResponse
+
+    @HTTP(method = "DELETE", path = "users/allergy", hasBody = true)
+    suspend fun deleteAllergy(
+        @Header("Authorization") token: String,
+        @Body id: AllergyDeleteRequest
+    ): CommonResponse
 
     @POST("products/allergy")
     suspend fun detectAllergy(

@@ -2,6 +2,7 @@ package com.nudriin.fits.data.repository
 
 import androidx.lifecycle.liveData
 import com.google.gson.Gson
+import com.nudriin.fits.data.dto.allergy.AllergyDeleteRequest
 import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.dto.allergy.AllergyId
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveRequest
@@ -76,6 +77,21 @@ class AllergyRepository private constructor(
         try {
             val response =
                 apiService.detectAllergy(userPreference.getSession().first().token.toJWT(), request)
+            emit(Result.Success(response))
+        } catch (e: HttpException) {
+            val response = e.response()?.errorBody()?.string()
+            val body = Gson().fromJson(response, ErrorResponse::class.java)
+            emit(Result.Error(Event(body.message)))
+        } catch (e: Exception) {
+            emit(Result.Error(Event(e.message ?: "An error occurred")))
+        }
+    }
+
+    fun deleteAllergy(request: AllergyDeleteRequest) = liveData {
+        emit(Result.Loading)
+        try {
+            val response =
+                apiService.deleteAllergy(userPreference.getSession().first().token.toJWT(), request)
             emit(Result.Success(response))
         } catch (e: HttpException) {
             val response = e.response()?.errorBody()?.string()
