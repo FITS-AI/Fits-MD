@@ -2,9 +2,12 @@ package com.nudriin.fits.ui.camera
 
 import android.app.Dialog
 import android.content.Context
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.camera.core.Camera
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -28,6 +31,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
@@ -37,18 +41,23 @@ import com.nudriin.fits.adapter.AnalysisAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
-import com.nudriin.fits.data.dto.allergy.AllergyItem
+import com.nudriin.fits.data.dto.gemini.Contents
+import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
+import com.nudriin.fits.data.dto.gemini.GeminiRequest
+import com.nudriin.fits.data.dto.gemini.Part
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
 import com.nudriin.fits.databinding.DialogEditTextBinding
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
+import com.nudriin.fits.utils.OcrHelper
 import com.nudriin.fits.utils.Result
 import com.nudriin.fits.utils.ViewModelFactory
 import com.nudriin.fits.utils.getGradeId
 import com.nudriin.fits.utils.showToast
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -64,8 +73,8 @@ class CameraActivity : AppCompatActivity() {
     private var isFlashOn = false
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
     private var snapState = 1
-    private lateinit var nutritionData: String
-    private lateinit var compositionData: String
+    private var nutritionData: String? = null
+    private var geminiGenerationResponse: GeminiGenerationResponse? = null
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
     private val appSettingsViewModel: AppSettingsViewModel by viewModels {
         ViewModelFactory.getInstance(this)
@@ -75,6 +84,9 @@ class CameraActivity : AppCompatActivity() {
     }
     private var summary: HealthRecommendationSummary? = null
     private var analysisGrade: String? = null
+    private lateinit var ocrHelper: OcrHelper
+
+    private lateinit var bitmapImage: Bitmap
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +108,6 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
-
     }
 
 
@@ -122,7 +133,7 @@ class CameraActivity : AppCompatActivity() {
                     this, cameraSelector, preview, imageCapture
                 )
             } catch (exc: Exception) {
-                showToast(this, "Gagal memunculkan kamera.")
+                showToast(this, "Failed to open camera.")
                 Log.e(TAG, "startCamera: ${exc.message}")
             }
         }, ContextCompat.getMainExecutor(this))
@@ -143,8 +154,29 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     when (snapState) {
                         1 -> {
-                            showToast(this@CameraActivity, "Success get nutritional fact data!")
-                            nutritionData = "Data Gizi Berhasil di ekstrak"
+                            val croppedUri = cropImage(output.savedUri!!)
+                            bitmapImage =
+                                MediaStore.Images.Media.getBitmap(contentResolver, croppedUri)
+                            ocrHelper.detectObject(bitmapImage)
+                            val textRecognizer =
+                                TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
+                            val inputImage: InputImage =
+                                InputImage.fromFilePath(this@CameraActivity, croppedUri)
+
+                            textRecognizer.process(inputImage)
+                                .addOnSuccessListener { visionText: Text ->
+                                    val detectedText: String = visionText.text
+                                    if (detectedText.isNotBlank()) {
+                                        nutritionData = detectedText
+                                    } else {
+                                        showToast(this@CameraActivity, "An error occurred!")
+                                    }
+                                    showLoading(false)
+                                }
+                                .addOnFailureListener {
+                                    showLoading(false)
+                                    showToast(this@CameraActivity, "An error occurred!")
+                                }
                             snapState = 2
                             val title = getString(R.string.instruction, "Two")
                             val message = getString(R.string.composition_instruction)
@@ -153,26 +185,17 @@ class CameraActivity : AppCompatActivity() {
                         }
 
                         2 -> {
+                            val croppedUri = cropImage(output.savedUri!!)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                             val inputImage: InputImage =
-                                InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+                                InputImage.fromFilePath(this@CameraActivity, croppedUri)
 
                             textRecognizer.process(inputImage)
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
-                                        compositionData = detectedText
-
-                                        // TODO( Change this with analysis result)
-                                        val inputString =
-                                            "0.0, 1.0, 1.1, 10.0" // Contoh input gula, lemak, protein, kalori
-                                        val inputValues =
-                                            inputString.split(",").map { it.trim().toFloat() }
-                                                .toFloatArray()
-                                        healthRecommendationHelper.predict(inputValues)
-                                        bottomSheetBehavior.state =
-                                            BottomSheetBehavior.STATE_HALF_EXPANDED
+                                        setGeminiGenerationResponse(nutritionData!!, detectedText)
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
                                     }
@@ -187,7 +210,7 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exc: ImageCaptureException) {
-                    showToast(this@CameraActivity, "Gagal mengambil gambar.")
+                    showToast(this@CameraActivity, "Failed to take the picture.")
                     Log.e(TAG, "onError: ${exc.message}")
                 }
             }
@@ -231,6 +254,8 @@ class CameraActivity : AppCompatActivity() {
                 summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
 
                 setAnalysisResult(summary!!, result)
+                bottomSheetBehavior.state =
+                    BottomSheetBehavior.STATE_EXPANDED
             },
             onError = { msg ->
                 showToast(this@CameraActivity, msg)
@@ -246,6 +271,31 @@ class CameraActivity : AppCompatActivity() {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
             }
         }
+
+        ocrHelper = OcrHelper(
+            context = this@CameraActivity,
+            detectorListener = object : OcrHelper.DetectorListener {
+                override fun onError(error: String) {
+                    runOnUiThread {
+                        Log.d("CameraOCRError", error)
+                        showToast(this@CameraActivity, error)
+                    }
+                }
+
+                override fun onResults(
+                    results: FloatArray,
+                    inferenceTime: Long,
+                    imageHeight: Int,
+                    imageWidth: Int,
+                    boundingImg: Bitmap?
+                ) {
+                    runOnUiThread {
+                        Log.d("OCR_CAMERA_RES", results.joinToString())
+                    }
+                }
+
+            }
+        )
     }
 
     private fun setupAction() {
@@ -367,24 +417,27 @@ class CameraActivity : AppCompatActivity() {
 
         dialogSaveProductBinding.btnSave.setOnClickListener {
             val productName = dialogSaveProductBinding.edtProductName.text.toString()
+            var request: ProductSaveRequest
+            geminiGenerationResponse.let {
+                request = ProductSaveRequest(
+                    gradesId = getGradeId(analysisGrade!!)!!,
+                    name = productName,
+                    calories = summary!!.calories,
+                    caloriesIng = it?.caloriesIng!!,
+                    protein = summary!!.protein,
+                    proteinIng = it.proteinIng,
+                    fat = summary!!.fat,
+                    fatIng = it.fatIng,
+                    fiber = "2 g",
+                    fiberIng = "oats, flaxseed",
+                    carbo = "20 g",
+                    carboIng = "wheat, rice",
+                    sugar = summary!!.sugar,
+                    sugarIng = it.sugarIng,
+                    allergy = listOf()
+                )
 
-            val request = ProductSaveRequest(
-                gradesId = getGradeId(analysisGrade!!)!!,
-                name = productName,
-                calories = summary!!.calories,
-                caloriesIng = "sugar, flour",
-                protein = summary!!.protein,
-                proteinIng = "soy, milk",
-                fat = summary!!.fat,
-                fatIng = "butter, cream",
-                fiber = "2 g",
-                fiberIng = "oats, flaxseed",
-                carbo = "20 g",
-                carboIng = "wheat, rice",
-                sugar = summary!!.sugar,
-                sugarIng = "sucrose, honey",
-                allergy = listOf()
-            )
+            }
 
             productViewModel.saveProduct(request).observe(this) { result ->
                 when (result) {
@@ -411,6 +464,81 @@ class CameraActivity : AppCompatActivity() {
         dialog.show()
     }
 
+    private fun setGeminiGenerationResponse(nutritionalData: String, compositionData: String) {
+        val request = GeminiRequest(
+            listOf(
+                Contents(
+                    listOf(
+                        Part(
+                            "Nutritional Fact: $nutritionalData Composition: $compositionData" + getString(
+                                R.string.gemini_prompt
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        productViewModel.generateContent(request)
+            .observe(this@CameraActivity) { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        showLoading(true)
+                    }
+
+                    is Result.Success -> {
+                        showLoading(false)
+                        val response =
+                            result.data.candidates.first().content.parts.first().text.trimIndent()
+
+                        val jsonRegex =
+                            """json\n(\{.*?\})""".toRegex(
+                                RegexOption.DOT_MATCHES_ALL
+                            )
+
+                        val match = jsonRegex.find(response)
+                        val jsonString = match?.groupValues?.get(1)
+
+                        Log.d(
+                            "GEMINI_RESULT",
+                            jsonString!!
+                        )
+
+                        geminiGenerationResponse = Gson().fromJson(
+                            jsonString,
+                            GeminiGenerationResponse::class.java
+                        )
+
+                        val inputValues =
+                            floatArrayOf(
+                                geminiGenerationResponse?.sugar?.toFloat()!!,
+                                geminiGenerationResponse?.fat?.toFloat()!!,
+                                geminiGenerationResponse?.protein?.toFloat()!!,
+                                geminiGenerationResponse?.calories?.toFloat()!!
+                            )
+
+                        Log.d(
+                            "HEALTH_REC_INPUT",
+                            inputValues.joinToString()
+                        )
+                        floatArrayOf()
+                        healthRecommendationHelper.predict(floatArrayOf(100f, 200f, 0f, 300f))
+                    }
+
+                    is Result.Error -> {
+                        showLoading(false)
+                        result.error.getContentIfNotHandled()
+                            .let { toastText ->
+                                showToast(
+                                    this@CameraActivity,
+                                    toastText.toString()
+                                )
+                            }
+                    }
+                }
+            }
+    }
+
     private fun showLoading(isLoading: Boolean) {
         if (isLoading) {
             binding.progressIndicator.visibility = View.VISIBLE
@@ -432,6 +560,7 @@ class CameraActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         healthRecommendationHelper.close()
+        ocrHelper.close()
     }
 
     companion object {
@@ -444,5 +573,36 @@ class CameraActivity : AppCompatActivity() {
     private fun createCustomTempFile(context: Context): File {
         val filesDir = context.externalCacheDir
         return File.createTempFile(timeStamp, ".jpg", filesDir)
+    }
+
+    private fun cropImage(uri: Uri): Uri {
+        val image = MediaStore.Images.Media.getBitmap(contentResolver, uri)
+
+        val previewView = binding.viewFinder
+        val overlayView = binding.overlay
+        val overlayBounds = overlayView.getOverlayBounds()
+
+        val scaleX = image.width.toFloat() / previewView.width
+        val scaleY = image.height.toFloat() / previewView.height
+
+        val cropLeft = (overlayBounds.left * scaleX).toInt()
+        val cropTop = (overlayBounds.top * scaleY).toInt()
+        val cropWidth = (overlayBounds.width() * scaleX).toInt()
+        val cropHeight = (overlayBounds.height() * scaleY).toInt()
+
+        val croppedBitmap = Bitmap.createBitmap(
+            image,
+            cropLeft.coerceAtLeast(0),
+            cropTop.coerceAtLeast(0),
+            cropWidth.coerceAtMost(image.width - cropLeft),
+            cropHeight.coerceAtMost(image.height - cropTop)
+        )
+
+        val croppedFile = File(cacheDir, "cropped_image.jpg")
+        val outputStream = FileOutputStream(croppedFile)
+        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.close()
+
+        return Uri.fromFile(croppedFile)
     }
 }
