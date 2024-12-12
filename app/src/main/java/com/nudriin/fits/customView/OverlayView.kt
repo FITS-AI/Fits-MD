@@ -1,53 +1,65 @@
 package com.nudriin.fits.customView
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.Rect
-import android.graphics.RectF
+import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 import androidx.core.content.ContextCompat
 import com.nudriin.fits.R
-import java.text.NumberFormat
-import kotlin.math.max
 
 class OverlayView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
-    private var boundingBox: Rect? = null
-    private var image: Bitmap? = null
+
+    private val borderPaint = Paint().apply {
+        color = Color.WHITE
+        style = Paint.Style.STROKE
+        strokeWidth = 8f
+        isAntiAlias = true
+    }
+
+    private val cornerLength = 80f // panjang sisi sudut
+
+    private val overlayWidth = 278f
+    private val overlayHeight = 350f
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        image?.let { img ->
-            // Draw the image
-            canvas.drawBitmap(img, 0f, 0f, null)
+        val scale = resources.displayMetrics.density
+        val widthPx = overlayWidth * scale
+        val heightPx = overlayHeight * scale
 
-            boundingBox?.let { box ->
-                // Draw the bounding box
-                val paint = Paint()
-                paint.color = Color.RED
-                paint.strokeWidth = 4f
-                paint.style = Paint.Style.STROKE
-                canvas.drawRect(box, paint)
-            }
-        }
+        val left = (width - widthPx) / 2
+        val top = (height - heightPx) / 2
+        val right = left + widthPx
+        val bottom = top + heightPx
+
+        // kiri top
+        canvas.drawLine(left, top, left + cornerLength, top, borderPaint)
+        canvas.drawLine(left, top, left, top + cornerLength, borderPaint)
+
+        // kanan top
+        canvas.drawLine(right, top, right - cornerLength, top, borderPaint)
+        canvas.drawLine(right, top, right, top + cornerLength, borderPaint)
+
+        // kanan bottom
+        canvas.drawLine(right, bottom, right - cornerLength, bottom, borderPaint)
+        canvas.drawLine(right, bottom, right, bottom - cornerLength, borderPaint)
+
+        // kiri bottom
+        canvas.drawLine(left, bottom, left + cornerLength, bottom, borderPaint)
+        canvas.drawLine(left, bottom, left, bottom - cornerLength, borderPaint)
     }
 
-    fun setBoundingBox(box: Rect) {
-        boundingBox = box
-        invalidate() // Trigger a redraw
-    }
-
-    fun setImage(img: Bitmap) {
-        image = img
-        invalidate() // Trigger a redraw
+    fun getOverlayBounds(): RectF {
+        val scale = resources.displayMetrics.density
+        val widthPx = overlayWidth * scale
+        val heightPx = overlayHeight * scale
+        val left = (width - widthPx) / 2
+        val top = (height - heightPx) / 2
+        return RectF(left, top, left + widthPx, top + heightPx)
     }
 }

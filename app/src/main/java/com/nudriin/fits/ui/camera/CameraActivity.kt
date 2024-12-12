@@ -3,11 +3,11 @@ package com.nudriin.fits.ui.camera
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.camera.core.Camera
 import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.view.OrientationEventListener
 import android.view.Surface
@@ -57,6 +57,7 @@ import com.nudriin.fits.utils.ViewModelFactory
 import com.nudriin.fits.utils.getGradeId
 import com.nudriin.fits.utils.showToast
 import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -153,12 +154,14 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     when (snapState) {
                         1 -> {
-                            bitmapImage = uriToBitmap(output.savedUri!!)!!
+                            val croppedUri = cropImage(output.savedUri!!)
+                            bitmapImage =
+                                MediaStore.Images.Media.getBitmap(contentResolver, croppedUri)
                             ocrHelper.detectObject(bitmapImage)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                             val inputImage: InputImage =
-                                InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+                                InputImage.fromFilePath(this@CameraActivity, croppedUri)
 
                             textRecognizer.process(inputImage)
                                 .addOnSuccessListener { visionText: Text ->
@@ -182,10 +185,11 @@ class CameraActivity : AppCompatActivity() {
                         }
 
                         2 -> {
+                            val croppedUri = cropImage(output.savedUri!!)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                             val inputImage: InputImage =
-                                InputImage.fromFilePath(this@CameraActivity, output.savedUri!!)
+                                InputImage.fromFilePath(this@CameraActivity, croppedUri)
 
                             textRecognizer.process(inputImage)
                                 .addOnSuccessListener { visionText: Text ->
@@ -572,17 +576,34 @@ class CameraActivity : AppCompatActivity() {
         return File.createTempFile(timeStamp, ".jpg", filesDir)
     }
 
-    private fun uriToBitmap(imageUri: Uri): Bitmap? {
-        return try {
-            val bitmapImage = this.contentResolver
-                .openInputStream(imageUri)?.use { inputStream ->
-                    BitmapFactory.decodeStream(inputStream)
-                }
+    private fun cropImage(uri: Uri): Uri {
+        val image = MediaStore.Images.Media.getBitmap(contentResolver, uri)
 
-            bitmapImage
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        val previewView = binding.viewFinder
+        val overlayView = binding.overlay
+        val overlayBounds = overlayView.getOverlayBounds()
+
+        val scaleX = image.width.toFloat() / previewView.width
+        val scaleY = image.height.toFloat() / previewView.height
+
+        val cropLeft = (overlayBounds.left * scaleX).toInt()
+        val cropTop = (overlayBounds.top * scaleY).toInt()
+        val cropWidth = (overlayBounds.width() * scaleX).toInt()
+        val cropHeight = (overlayBounds.height() * scaleY).toInt()
+
+        val croppedBitmap = Bitmap.createBitmap(
+            image,
+            cropLeft.coerceAtLeast(0),
+            cropTop.coerceAtLeast(0),
+            cropWidth.coerceAtMost(image.width - cropLeft),
+            cropHeight.coerceAtMost(image.height - cropTop)
+        )
+
+        val croppedFile = File(cacheDir, "cropped_image.jpg")
+        val outputStream = FileOutputStream(croppedFile)
+        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+        outputStream.close()
+
+        return Uri.fromFile(croppedFile)
     }
 }
