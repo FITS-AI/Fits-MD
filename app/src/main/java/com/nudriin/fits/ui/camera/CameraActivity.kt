@@ -32,6 +32,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
@@ -41,9 +42,11 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.adapter.AnalysisAdapter
+import com.nudriin.fits.adapter.SavedAllergyAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
+import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.dto.gemini.Contents
 import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
@@ -54,6 +57,7 @@ import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
 import com.nudriin.fits.databinding.DialogEditTextBinding
+import com.nudriin.fits.ui.allergy.AllergyViewModel
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
 import com.nudriin.fits.utils.OcrHelper
@@ -89,6 +93,9 @@ class CameraActivity : AppCompatActivity() {
     private val productViewModel: ProductViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
+    private val allergyViewModel: AllergyViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
     private var summary: HealthRecommendationSummary? = null
     private var analysisGrade: String? = null
     private lateinit var ocrHelper: OcrHelper
@@ -96,6 +103,7 @@ class CameraActivity : AppCompatActivity() {
 
     private lateinit var bitmapImage: Bitmap
     private var ocrImageResult: Bitmap? = null
+    private var detectedAllergy: String? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -621,6 +629,7 @@ class CameraActivity : AppCompatActivity() {
                         )
                         setLlmResponse(geminiGenerationResponse)
                         healthRecommendationHelper.predict(inputValues)
+                        detectUserAllergy(geminiGenerationResponse)
                     }
 
                     is Result.Error -> {
@@ -655,6 +664,7 @@ class CameraActivity : AppCompatActivity() {
             when (result) {
                 is Result.Loading -> {
                     showLoading(true)
+                    binding.tvAssessmentBottomSheet.text = "Retrieving the data ..."
                 }
 
                 is Result.Success -> {
@@ -665,12 +675,57 @@ class CameraActivity : AppCompatActivity() {
 
                 is Result.Error -> {
                     showLoading(false)
+                    binding.tvAssessmentBottomSheet.text = "No data"
                     result.error.getContentIfNotHandled().let { toastText ->
                         showToast(this, toastText.toString())
                     }
                 }
             }
         }
+    }
+
+    private fun detectUserAllergy(data: GeminiGenerationResponse?) {
+        if (data == null) {
+            return
+        }
+
+        val ingredient = "${data.sugarIng} ${data.fatIng} ${data.proteinIng} ${data.caloriesIng}"
+        val input = ingredient
+            .replace(",", "")
+            .replace("No data", "")
+            .replace("\\s+".toRegex(), " ")
+            .trim()
+
+        allergyViewModel.detectAllergy(AllergyDetectRequest(input)).observe(this) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                    binding.tvAllergenBottomSheet.text = "Retrieving the data ..."
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    result.data.allergyContained.map {
+                        detectedAllergy = it.allergen
+                    }
+
+                    if (detectedAllergy == "") {
+                        detectedAllergy = "No allergy detected"
+                    }
+
+                    binding.tvAllergenBottomSheet.text = detectedAllergy ?: "No allergy detected"
+                }
+
+                is Result.Error -> {
+                    showLoading(false)
+                    binding.tvAllergenBottomSheet.text = "No allergy detected"
+                    result.error.getContentIfNotHandled().let { toastText ->
+                        showToast(this, toastText.toString())
+                    }
+                }
+            }
+        }
+
     }
 
     private fun showLoading(isLoading: Boolean) {

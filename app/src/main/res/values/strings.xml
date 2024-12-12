@@ -35,6 +35,7 @@
     <string name="save_allergy">Save</string>
     <string name="health_preferences_message">Select the food details that matter most to you, such as allergen information, to rank foods based on your preferences, view the most relevant details first, and receive a summary of compatibility with your health needs.</string>
     <string name="allergens">Add Allergens</string>
+    <string name="allergen_text">Allergens</string>
     <string name="instruction">Step %s</string>
     <string name="nutrition_table_instruction">Please capture a clear photo of the <b>nutrition facts table</b> on the product, ensuring all information is visible and well-focused.</string>
     <string name="composition_instruction">Please capture a clear photo of the product <b>composition</b> section, ensuring all text is legible and well-focused.</string>

@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
 import androidx.camera.core.ImageProxy
+import com.google.android.gms.tflite.gpu.GpuDelegate
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
@@ -19,7 +20,6 @@ class OcrHelper(
     private val detectorListener: DetectorListener?
 ) {
 
-    private var isGPUSupported: Boolean = false
     private var interpreter: Interpreter? = null
 
     init {
@@ -68,7 +68,7 @@ class OcrHelper(
         }
 
         val resizedBitmap =
-            Bitmap.createScaledBitmap(image.toBitmap(), image.width, image.height, true)
+            Bitmap.createScaledBitmap(image.toBitmap(), 224, 224, true)
         val inputArray = preprocessImage(resizedBitmap)
 
         val outputArray = Array(1) { FloatArray(4) }
@@ -90,8 +90,10 @@ class OcrHelper(
 
     private fun initInterpreter() {
         interpreter?.close()
+        val tfLiteOption = Interpreter.Options().setNumThreads(4)
+
         try {
-            interpreter = Interpreter(loadModelFile(context.assets, modelName))
+            interpreter = Interpreter(loadModelFile(context.assets, modelName), tfLiteOption)
         } catch (e: Exception) {
             detectorListener?.onError(e.message.toString())
             Log.e(TAG, e.message.toString())

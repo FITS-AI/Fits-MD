@@ -1,6 +1,8 @@
 package com.nudriin.fits.data.retrofit
 
 import com.nudriin.fits.BuildConfig
+import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
+import com.nudriin.fits.data.dto.allergy.AllergyDetectResponse
 import com.nudriin.fits.data.dto.allergy.AllergyGetAllResponse
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveRequest
 import com.nudriin.fits.data.dto.allergy.AllergyUserSaveResponse
@@ -50,6 +52,12 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body request: AllergyUserSaveRequest
     ): AllergyUserSaveResponse
+
+    @POST("products/allergy")
+    suspend fun detectAllergy(
+        @Header("Authorization") token: String,
+        @Body request: AllergyDetectRequest
+    ): AllergyDetectResponse
 
     @GET("products")
     suspend fun getAllProducts(@Header("Authorization") token: String): ProductGetAllResponse
