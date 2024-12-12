@@ -84,4 +84,5 @@
 
     <string name="llm_prompt">health_assessment The product contains %s calories, %sg of fat, %sg of sugar, and %sg of protein.</string>
     <string name="health_assessment">Health Assessment</string>
+    <string name="content_ing">Ingredient: %s</string>
 </resources>

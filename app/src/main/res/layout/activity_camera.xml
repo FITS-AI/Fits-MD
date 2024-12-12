@@ -63,15 +63,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!--        <ImageView-->
-        <!--            android:id="@+id/iv_bbox"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            app:layout_constraintTop_toTopOf="parent"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent" />-->
-
         <ImageView
             android:id="@+id/captureImage"
             android:layout_width="60dp"
@@ -219,7 +210,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="16sp"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="14dp"
                         android:fontFamily="@font/plus_jakarta_sans"
                         app:layout_constraintTop_toBottomOf="@id/tv_overall_bottom_sheet_header"
                         tools:text="Overall" />
@@ -249,7 +240,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="16sp"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="14dp"
                         android:fontFamily="@font/plus_jakarta_sans"
                         app:layout_constraintTop_toBottomOf="@id/tv_assessment_bottom_sheet_header"
                         tools:text="Assessment" />

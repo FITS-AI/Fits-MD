@@ -198,6 +198,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    @Suppress("DEPRECATION")
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -416,6 +417,16 @@ class CameraActivity : AppCompatActivity() {
         summary: HealthRecommendationSummary,
         analysisResult: String? = null
     ) {
+
+        val sugarIng =
+            resources.getString(R.string.content_ing, geminiGenerationResponse?.sugarIng ?: "")
+        val fatIng =
+            resources.getString(R.string.content_ing, geminiGenerationResponse?.fatIng ?: "")
+        val proteinIng =
+            resources.getString(R.string.content_ing, geminiGenerationResponse?.proteinIng ?: "")
+        val caloriesIng =
+            resources.getString(R.string.content_ing, geminiGenerationResponse?.caloriesIng ?: "")
+
         binding.tvGradeLabel.text = analysisResult ?: "!"
         binding.tvGradeBottomSheet.text = summary.grade
         binding.tvOverallBottomSheet.text = summary.overall
@@ -428,10 +439,28 @@ class CameraActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         binding.rvAnalysisResult.layoutManager = layoutManager
 
-        val sugar = HealthAnalysis("Sugar", summary.sugar)
-        val fat = HealthAnalysis("Fat", summary.fat)
-        val protein = HealthAnalysis("Protein", summary.protein)
-        val calories = HealthAnalysis("Calories", summary.calories)
+        val sugar = HealthAnalysis(
+            "Sugar ${geminiGenerationResponse?.sugar ?: ""}",
+            summary.sugar,
+            sugarIng
+        )
+        val fat = HealthAnalysis(
+            "Fat ${geminiGenerationResponse?.fat ?: ""}",
+            summary.fat,
+            fatIng
+        )
+        val protein =
+            HealthAnalysis(
+                "Protein ${geminiGenerationResponse?.protein ?: ""}",
+                summary.protein,
+                proteinIng
+            )
+        val calories =
+            HealthAnalysis(
+                "Calories ${geminiGenerationResponse?.calories ?: ""}",
+                summary.calories,
+                caloriesIng
+            )
 
         val analysisList = listOf<HealthAnalysis>(sugar, fat, protein, calories)
 
@@ -492,17 +521,17 @@ class CameraActivity : AppCompatActivity() {
                     gradesId = getGradeId(analysisGrade!!)!!,
                     name = productName,
                     calories = summary!!.calories,
-                    caloriesIng = it?.caloriesIng!!,
+                    caloriesIng = geminiGenerationResponse?.caloriesIng ?: "0.0",
                     protein = summary!!.protein,
-                    proteinIng = it.proteinIng,
+                    proteinIng = geminiGenerationResponse?.proteinIng ?: "0.0",
                     fat = summary!!.fat,
-                    fatIng = it.fatIng,
+                    fatIng = geminiGenerationResponse?.fatIng ?: "0.0",
                     fiber = "2 g",
                     fiberIng = "oats, flaxseed",
                     carbo = "20 g",
                     carboIng = "wheat, rice",
                     sugar = summary!!.sugar,
-                    sugarIng = it.sugarIng,
+                    sugarIng = geminiGenerationResponse?.sugarIng ?: "0.0",
                     allergy = listOf()
                 )
 
