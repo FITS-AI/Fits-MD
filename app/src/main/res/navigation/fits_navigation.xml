@@ -73,7 +73,29 @@
         android:id="@+id/scanHistoryDetailFragment"
         android:name="com.nudriin.fits.ui.scanHistoryDetail.ScanHistoryDetailFragment"
         android:label="fragment_scan_history_detail"
-        tools:layout="@layout/fragment_scan_history_detail" />
+        tools:layout="@layout/fragment_scan_history_detail">
+        <argument
+            android:name="label"
+            app:argType="string" />
+        <argument
+            android:name="name"
+            app:argType="string" />
+        <argument
+            android:name="overall"
+            app:argType="string" />
+        <argument
+            android:name="sugar"
+            app:argType="com.nudriin.fits.data.domain.HealthAnalysis" />
+        <argument
+            android:name="fat"
+            app:argType="com.nudriin.fits.data.domain.HealthAnalysis" />
+        <argument
+            android:name="protein"
+            app:argType="com.nudriin.fits.data.domain.HealthAnalysis" />
+        <argument
+            android:name="calories"
+            app:argType="com.nudriin.fits.data.domain.HealthAnalysis" />
+    </fragment>
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.nudriin.fits.ui.profile.ProfileFragment"
@@ -85,6 +107,9 @@
         <action
             android:id="@+id/action_profileFragment_to_appSettingFragment"
             app:destination="@id/appSettingFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_scanHistoryFragment"
+            app:destination="@id/scanHistoryFragment" />
     </fragment>
     <fragment
         android:id="@+id/allergyFragment"

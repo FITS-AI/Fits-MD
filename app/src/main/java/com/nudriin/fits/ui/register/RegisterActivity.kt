@@ -106,7 +106,7 @@ class RegisterActivity : AppCompatActivity() {
         return when {
             binding.nameEditText.text.toString().isEmpty() -> {
                 binding.nameEditTextLayout.error =
-                    getString(R.string.password_error_empty)
+                    getString(R.string.name_error_empty)
                 false
             }
 
