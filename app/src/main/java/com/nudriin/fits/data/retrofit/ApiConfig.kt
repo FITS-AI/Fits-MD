@@ -35,5 +35,15 @@ class ApiConfig {
 
             return retrofit.create(ApiService::class.java)
         }
+
+        fun getLlmApiService(): ApiService {
+            val retrofit = Retrofit.Builder()
+                .baseUrl(BuildConfig.LLM_API_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build()
+
+            return retrofit.create(ApiService::class.java)
+        }
     }
 }

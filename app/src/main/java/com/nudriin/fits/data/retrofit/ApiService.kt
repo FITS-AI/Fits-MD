@@ -7,6 +7,8 @@ import com.nudriin.fits.data.dto.allergy.AllergyUserSaveResponse
 import com.nudriin.fits.data.dto.article.ArticleGetAllResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
 import com.nudriin.fits.data.dto.gemini.GeminiResponse
+import com.nudriin.fits.data.dto.llm.LlmRequest
+import com.nudriin.fits.data.dto.llm.LlmResponse
 import com.nudriin.fits.data.dto.product.ProductGetAllResponse
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.data.dto.product.ProductSaveResponse
@@ -62,4 +64,9 @@ interface ApiService {
     suspend fun generateContent(
         @Body request: GeminiRequest
     ): GeminiResponse
+
+    @POST("?key=${BuildConfig.GEMINI_TOKEN_KEY}")
+    suspend fun promptLlm(
+        @Body request: LlmRequest
+    ): LlmResponse
 }
