@@ -65,7 +65,7 @@ interface ApiService {
         @Body request: GeminiRequest
     ): GeminiResponse
 
-    @POST("?key=${BuildConfig.GEMINI_TOKEN_KEY}")
+    @POST("prompt")
     suspend fun promptLlm(
         @Body request: LlmRequest
     ): LlmResponse

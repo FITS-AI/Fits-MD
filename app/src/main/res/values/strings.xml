@@ -71,14 +71,17 @@
                                                                     {
                                                                         analysis: Analisis kesehatan dalam 1-2 kalimat,
                                                                         sugar: float,
-                                                                        sugar_ing: bahan - bahan yang mengandung gula (sugar, flour)
+                                                                        sugar_ing: bahan - bahan yang mengandung gula (sugar, flour) string sebagai "No data" default
                                                                         calories: float,
-                                                                        calories_ing: bahan - bahan yang mengandung kalori (sugar, flour)
+                                                                        calories_ing: bahan - bahan yang mengandung kalori (sugar, flour) string sebagai "No data" default
                                                                         fat: float,
-                                                                        fat_ing: bahan - bahan yang mengandung lemak (butter, cream)
+                                                                        fat_ing: bahan - bahan yang mengandung lemak (butter, cream) string sebagai "No data" default
                                                                         protein: float,
-                                                                        protein_ing:  bahan - bahan yang mengandung protein (soy, milk)
+                                                                        protein_ing:  bahan - bahan yang mengandung protein (soy, milk) string sebagai "No data" default
                                                                     }
                                                                     6. Kembalikan JSON hanya dalam format string tanpa markdown
                                                                     7. Berikan jawaban dalam bahasa inggris</string>
+
+    <string name="llm_prompt">health_assessment The product contains %s calories, %sg of fat, %sg of sugar, and %sg of protein.</string>
+    <string name="health_assessment">Health Assessment</string>
 </resources>

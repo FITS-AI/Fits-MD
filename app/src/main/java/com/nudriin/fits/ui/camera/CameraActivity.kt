@@ -45,6 +45,8 @@ import com.nudriin.fits.data.dto.gemini.Contents
 import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
 import com.nudriin.fits.data.dto.gemini.Part
+import com.nudriin.fits.data.dto.llm.LlmRequest
+import com.nudriin.fits.data.dto.llm.LlmResponse
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
@@ -75,6 +77,7 @@ class CameraActivity : AppCompatActivity() {
     private var snapState = 1
     private var nutritionData: String? = null
     private var geminiGenerationResponse: GeminiGenerationResponse? = null
+    private var llmResponse: LlmResponse? = null
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
     private val appSettingsViewModel: AppSettingsViewModel by viewModels {
         ViewModelFactory.getInstance(this)
@@ -167,6 +170,10 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
+                                        showToast(
+                                            this@CameraActivity,
+                                            "Success get nutritional data"
+                                        )
                                         nutritionData = detectedText
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
@@ -195,6 +202,10 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
+                                        showToast(
+                                            this@CameraActivity,
+                                            "Success get composition data"
+                                        )
                                         setGeminiGenerationResponse(nutritionData!!, detectedText)
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
@@ -404,8 +415,8 @@ class CameraActivity : AppCompatActivity() {
     private fun showSaveProductDialog() {
         val dialog = Dialog(this, R.style.CustomDialogTheme)
 
-        if (dialogBinding.root.parent != null) {
-            (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
+        if (dialogSaveProductBinding.root.parent != null) {
+            (dialogSaveProductBinding.root.parent as ViewGroup).removeView(dialogSaveProductBinding.root)
         }
 
         dialog.setContentView(dialogSaveProductBinding.root)
@@ -521,8 +532,8 @@ class CameraActivity : AppCompatActivity() {
                             "HEALTH_REC_INPUT",
                             inputValues.joinToString()
                         )
-                        floatArrayOf()
-                        healthRecommendationHelper.predict(floatArrayOf(100f, 200f, 0f, 300f))
+                        setLlmResponse(geminiGenerationResponse)
+                        healthRecommendationHelper.predict(inputValues)
                     }
 
                     is Result.Error -> {
@@ -537,6 +548,41 @@ class CameraActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    private fun setLlmResponse(data: GeminiGenerationResponse?) {
+        if (data == null) {
+            return
+        }
+
+        val request = LlmRequest(
+            resources.getString(
+                R.string.llm_prompt,
+                data.calories,
+                data.fat,
+                data.sugar,
+                data.protein
+            )
+        )
+        productViewModel.generateLlm(request).observe(this) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    binding.tvAssessmentBottomSheet.text = result.data.data
+                }
+
+                is Result.Error -> {
+                    showLoading(false)
+                    result.error.getContentIfNotHandled().let { toastText ->
+                        showToast(this, toastText.toString())
+                    }
+                }
+            }
+        }
     }
 
     private fun showLoading(isLoading: Boolean) {

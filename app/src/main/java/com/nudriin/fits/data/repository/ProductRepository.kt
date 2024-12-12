@@ -66,7 +66,7 @@ class ProductRepository private constructor(
         emit(Result.Loading)
         try {
             val response =
-                geminiApiService.promptLlm(request)
+                llmApiService.promptLlm(request)
             emit(Result.Success(response))
         } catch (e: Exception) {
             emit(Result.Error(Event(e.message ?: "An error occurred")))
