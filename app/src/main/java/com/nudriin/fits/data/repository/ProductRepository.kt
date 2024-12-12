@@ -4,6 +4,7 @@ import androidx.lifecycle.liveData
 import com.google.gson.Gson
 import com.nudriin.fits.data.dto.error.ErrorResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
+import com.nudriin.fits.data.dto.llm.LlmRequest
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.data.pref.UserPreference
 import com.nudriin.fits.data.retrofit.ApiService
@@ -16,7 +17,8 @@ import retrofit2.HttpException
 class ProductRepository private constructor(
     private val userPreference: UserPreference,
     private val apiService: ApiService,
-    private val geminiApiService: ApiService
+    private val geminiApiService: ApiService,
+    private val llmApiService: ApiService
 ) {
 
     fun getAllProducts() = liveData {
@@ -60,16 +62,33 @@ class ProductRepository private constructor(
         }
     }
 
+    fun generateLlm(request: LlmRequest) = liveData {
+        emit(Result.Loading)
+        try {
+            val response =
+                geminiApiService.promptLlm(request)
+            emit(Result.Success(response))
+        } catch (e: Exception) {
+            emit(Result.Error(Event(e.message ?: "An error occurred")))
+        }
+    }
+
     companion object {
         @Volatile
         private var instance: ProductRepository? = null
         fun getInstance(
             userPreference: UserPreference,
             apiService: ApiService,
-            geminiApiService: ApiService
+            geminiApiService: ApiService,
+            llmApiService: ApiService
         ): ProductRepository =
             instance ?: synchronized(this) {
-                instance ?: ProductRepository(userPreference, apiService, geminiApiService)
+                instance ?: ProductRepository(
+                    userPreference,
+                    apiService,
+                    geminiApiService,
+                    llmApiService
+                )
             }.also { instance = it }
     }
 }
