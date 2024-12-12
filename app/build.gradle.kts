@@ -27,7 +27,13 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "API_URL", properties.getProperty("API_URL"))
+            buildConfigField("String", "FITS_API_URL", properties.getProperty("FITS_API_URL"))
+            buildConfigField("String", "GEMINI_API", properties.getProperty("GEMINI_API"))
+            buildConfigField(
+                "String",
+                "GEMINI_TOKEN_KEY",
+                properties.getProperty("GEMINI_TOKEN_KEY")
+            )
         }
         release {
             isMinifyEnabled = false
