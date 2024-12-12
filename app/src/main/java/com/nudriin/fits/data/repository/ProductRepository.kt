@@ -55,10 +55,6 @@ class ProductRepository private constructor(
             val response =
                 geminiApiService.generateContent(request)
             emit(Result.Success(response))
-        } catch (e: HttpException) {
-            val response = e.response()?.errorBody()?.string()
-            val body = Gson().fromJson(response, ErrorResponse::class.java)
-            emit(Result.Error(Event(body.message)))
         } catch (e: Exception) {
             emit(Result.Error(Event(e.message ?: "An error occurred")))
         }

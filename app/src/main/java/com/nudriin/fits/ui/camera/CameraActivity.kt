@@ -133,7 +133,7 @@ class CameraActivity : AppCompatActivity() {
                     this, cameraSelector, preview, imageCapture
                 )
             } catch (exc: Exception) {
-                showToast(this, "Gagal memunculkan kamera.")
+                showToast(this, "Failed to open camera.")
                 Log.e(TAG, "startCamera: ${exc.message}")
             }
         }, ContextCompat.getMainExecutor(this))
@@ -210,7 +210,7 @@ class CameraActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exc: ImageCaptureException) {
-                    showToast(this@CameraActivity, "Gagal mengambil gambar.")
+                    showToast(this@CameraActivity, "Failed to take the picture.")
                     Log.e(TAG, "onError: ${exc.message}")
                 }
             }
@@ -291,7 +291,6 @@ class CameraActivity : AppCompatActivity() {
                 ) {
                     runOnUiThread {
                         Log.d("OCR_CAMERA_RES", results.joinToString())
-                        showToast(this@CameraActivity, results.joinToString())
                     }
                 }
 
