@@ -7,6 +7,7 @@ import com.nudriin.fits.data.repository.AllergyRepository
 import com.nudriin.fits.data.repository.AppSettingsRepository
 import com.nudriin.fits.data.repository.ArticleRepository
 import com.nudriin.fits.data.repository.AuthRepository
+import com.nudriin.fits.data.repository.ProductRepository
 import com.nudriin.fits.data.retrofit.ApiConfig
 
 object Injection {
@@ -31,5 +32,11 @@ object Injection {
     fun provideAppSettingsRepository(context: Context): AppSettingsRepository {
         val userPreference = UserPreference.getInstance(context.dataStore)
         return AppSettingsRepository.getInstance(userPreference)
+    }
+
+    fun provideProductRepository(context: Context): ProductRepository {
+        val userPreference = UserPreference.getInstance(context.dataStore)
+        val apiService = ApiConfig.getApiService()
+        return ProductRepository.getInstance(userPreference, apiService)
     }
 }

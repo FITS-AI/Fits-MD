@@ -4,10 +4,12 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.nudriin.fits.common.AuthViewModel
+import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.repository.AllergyRepository
 import com.nudriin.fits.data.repository.AppSettingsRepository
 import com.nudriin.fits.data.repository.ArticleRepository
 import com.nudriin.fits.data.repository.AuthRepository
+import com.nudriin.fits.data.repository.ProductRepository
 import com.nudriin.fits.di.Injection
 import com.nudriin.fits.ui.allergy.AllergyViewModel
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
@@ -20,7 +22,8 @@ class ViewModelFactory(
     private val authRepository: AuthRepository,
     private val articleRepository: ArticleRepository,
     private val allergyRepository: AllergyRepository,
-    private val appSettingsRepository: AppSettingsRepository
+    private val appSettingsRepository: AppSettingsRepository,
+    private val productRepository: ProductRepository
 ) : ViewModelProvider.NewInstanceFactory() {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -53,6 +56,10 @@ class ViewModelFactory(
                 AppSettingsViewModel(appSettingsRepository) as T
             }
 
+            modelClass.isAssignableFrom(ProductViewModel::class.java) -> {
+                ProductViewModel(productRepository) as T
+            }
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: " + modelClass.name)
         }
     }
@@ -67,7 +74,8 @@ class ViewModelFactory(
                     Injection.provideAuthRepository(context),
                     Injection.provideArticleRepository(context),
                     Injection.provideAllergyRepository(context),
-                    Injection.provideAppSettingsRepository(context)
+                    Injection.provideAppSettingsRepository(context),
+                    Injection.provideProductRepository(context),
                 )
                 INSTANCE = instance
                 instance

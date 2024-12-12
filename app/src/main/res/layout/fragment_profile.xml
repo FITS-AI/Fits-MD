@@ -30,8 +30,8 @@
 
             <ImageView
                 android:id="@+id/iv_profile"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+                android:layout_width="160dp"
+                android:layout_height="160dp"
                 android:layout_marginTop="70dp"
                 android:src="@drawable/profile"
                 app:layout_constraintTop_toTopOf="parent"
@@ -97,7 +97,7 @@
                             android:fontFamily="@font/plus_jakarta_sans_bold"
                             android:layout_gravity="center_vertical"
                             android:gravity="start"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:text="@string/scan_history" />
 
                         <TextView
@@ -140,7 +140,7 @@
                             android:fontFamily="@font/plus_jakarta_sans_bold"
                             android:layout_gravity="center_vertical"
                             android:gravity="start"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:text="@string/health_preferences" />
 
                         <TextView
@@ -182,7 +182,7 @@
                             android:fontFamily="@font/plus_jakarta_sans_bold"
                             android:layout_gravity="center_vertical"
                             android:gravity="start"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:text="@string/app_settings" />
 
                         <TextView
