@@ -21,9 +21,12 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
@@ -63,6 +66,7 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
@@ -88,8 +92,10 @@ class CameraActivity : AppCompatActivity() {
     private var summary: HealthRecommendationSummary? = null
     private var analysisGrade: String? = null
     private lateinit var ocrHelper: OcrHelper
+    private lateinit var ocrRealtimeHelper: OcrHelper
 
     private lateinit var bitmapImage: Bitmap
+    private var ocrImageResult: Bitmap? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,19 +117,62 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
+        startCamera()
     }
 
 
     private fun startCamera() {
+        ocrRealtimeHelper = OcrHelper(
+            context = this@CameraActivity,
+            detectorListener = object : OcrHelper.DetectorListener {
+                override fun onError(error: String) {
+                    runOnUiThread {
+                        Log.d("CameraOCRError", error)
+                        showToast(this@CameraActivity, error)
+                    }
+                }
+
+                override fun onResults(
+                    results: FloatArray,
+                    imageHeight: Int,
+                    imageWidth: Int,
+                    boundingImg: Bitmap?
+                ) {
+                    runOnUiThread {
+                        Log.d("REALTIME_OCR_RES", results.joinToString())
+                        if (results.isNotEmpty() && results.size == 4) {
+                            binding.realtimeOverlay.updateBoundingBox(
+                                results,
+                                imageWidth,
+                                imageHeight
+                            )
+                        } else {
+                            binding.realtimeOverlay.clear()
+                        }
+                    }
+                }
+
+            }
+        )
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder()
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                 .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
+
+
+            val imageAnalyzer = ImageAnalysis.Builder()
+                .setResolutionSelector(resolutionSelector)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                .build()
+
+            imageAnalyzer.setAnalyzer(Executors.newSingleThreadExecutor()) { image ->
+                ocrRealtimeHelper.detectRealtimeObject(image)
+                image.close()
+            }
 
             imageCapture = ImageCapture.Builder()
                 .setTargetRotation(Surface.ROTATION_0)
@@ -131,9 +180,16 @@ class CameraActivity : AppCompatActivity() {
                 .build()
 
             try {
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder()
+                    .build()
+                    .also {
+                        it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                    }
+
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
+                    this, cameraSelector, preview, imageCapture, imageAnalyzer
                 )
             } catch (exc: Exception) {
                 showToast(this, "Failed to open camera.")
@@ -163,8 +219,11 @@ class CameraActivity : AppCompatActivity() {
                             ocrHelper.detectObject(bitmapImage)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-                            val inputImage: InputImage =
+                            val inputImage: InputImage = if (ocrImageResult != null) {
+                                InputImage.fromBitmap(ocrImageResult!!, Surface.ROTATION_0)
+                            } else {
                                 InputImage.fromFilePath(this@CameraActivity, croppedUri)
+                            }
 
                             textRecognizer.process(inputImage)
                                 .addOnSuccessListener { visionText: Text ->
@@ -189,6 +248,7 @@ class CameraActivity : AppCompatActivity() {
                             val message = getString(R.string.composition_instruction)
                             showDialog(title, message)
                             showLoading(false)
+                            binding.realtimeOverlay.visibility = View.GONE
                         }
 
                         2 -> {
@@ -239,8 +299,6 @@ class CameraActivity : AppCompatActivity() {
             )
         }
         supportActionBar?.hide()
-
-        startCamera()
 
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
@@ -301,7 +359,7 @@ class CameraActivity : AppCompatActivity() {
                 ) {
                     runOnUiThread {
                         Log.d("OCR_CAMERA_RES", results.joinToString())
-                        binding.ivCameraOverlay.setImageBitmap(boundingImg)
+                        ocrImageResult = boundingImg
                     }
                 }
 
@@ -572,6 +630,7 @@ class CameraActivity : AppCompatActivity() {
 
                 is Result.Success -> {
                     showLoading(false)
+                    llmResponse = result.data
                     binding.tvAssessmentBottomSheet.text = result.data.data
                 }
 

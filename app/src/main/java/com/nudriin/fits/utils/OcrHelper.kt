@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.Log
+import androidx.camera.core.ImageProxy
 import org.tensorflow.lite.Interpreter
 import java.io.FileInputStream
 import java.nio.MappedByteBuffer
@@ -33,7 +34,7 @@ class OcrHelper(
 
         try {
 
-            val resizedBitmap = Bitmap.createScaledBitmap(image, 224, 224, true)
+            val resizedBitmap = Bitmap.createScaledBitmap(image, image.width, image.height, true)
             val inputArray = preprocessImage(resizedBitmap)
 
             val outputArray = Array(1) { FloatArray(4) }
@@ -58,6 +59,33 @@ class OcrHelper(
             Log.e(TAG, "Error during inference: ${e.message}")
             detectorListener?.onError("Error during inference")
         }
+    }
+
+    fun detectRealtimeObject(image: ImageProxy) {
+        if (interpreter == null) {
+            detectorListener?.onError("Model is not initialized")
+            return
+        }
+
+        val resizedBitmap =
+            Bitmap.createScaledBitmap(image.toBitmap(), image.width, image.height, true)
+        val inputArray = preprocessImage(resizedBitmap)
+
+        val outputArray = Array(1) { FloatArray(4) }
+
+        interpreter?.run(inputArray, outputArray)
+
+        val boundingBox = outputArray[0]
+        val scaledBoundingBox = scaleBoundingBox(boundingBox, image.width, image.height)
+
+        val resultBitmap = drawBoundingBox(image.toBitmap(), scaledBoundingBox)
+
+        detectorListener?.onResults(
+            scaledBoundingBox,
+            image.height,
+            image.width,
+            resultBitmap
+        )
     }
 
     private fun initInterpreter() {

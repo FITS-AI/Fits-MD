@@ -52,16 +52,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!--        <com.nudriin.fits.customView.OverlayView-->
-        <!--            android:id="@+id/overlay"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:translationZ="40dp"-->
-        <!--            android:elevation="10dp"-->
-        <!--            app:layout_constraintTop_toTopOf="parent"-->
-        <!--            app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--            app:layout_constraintStart_toStartOf="parent"-->
-        <!--            app:layout_constraintEnd_toEndOf="parent" />-->
+        <com.nudriin.fits.customView.RealtimeOverlayView
+            android:id="@+id/realtime_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:translationZ="40dp"
+            android:elevation="10dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <!--        <ImageView-->
         <!--            android:id="@+id/iv_bbox"-->
@@ -112,7 +112,7 @@
         android:background="@drawable/white_bg_rounded"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="1000dp">
+        app:behavior_peekHeight="0dp">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
