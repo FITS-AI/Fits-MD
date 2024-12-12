@@ -31,6 +31,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.google.gson.Gson
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.TextRecognition
@@ -41,6 +42,7 @@ import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
 import com.nudriin.fits.data.dto.gemini.Contents
+import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
 import com.nudriin.fits.data.dto.gemini.Part
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
@@ -70,8 +72,8 @@ class CameraActivity : AppCompatActivity() {
     private var isFlashOn = false
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
     private var snapState = 1
-    private lateinit var nutritionData: String
-    private lateinit var compositionData: String
+    private var nutritionData: String? = null
+    private var geminiGenerationResponse: GeminiGenerationResponse? = null
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
     private val appSettingsViewModel: AppSettingsViewModel by viewModels {
         ViewModelFactory.getInstance(this)
@@ -162,76 +164,7 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
-                                        compositionData = detectedText
-
-                                        val request = GeminiRequest(
-                                            listOf(
-                                                Contents(
-                                                    listOf(
-                                                        Part(
-                                                            "OCR Result: $detectedText Anda adalah asisten ahli gizi yang bertugas mengekstraksi informasi nutrisi dari teks OCR yang tidak teratur. Ikuti instruksi berikut dengan cermat:\n" +
-                                                                    "\n" +
-                                                                    "1. Bersihkan teks input dengan menghapus semua data yang tidak terkait dengan nutrition label.\n" +
-                                                                    "\n" +
-                                                                    "2. Fokus pada mengekstraksi nilai-nilai spesifik berikut:\n" +
-                                                                    "- Sugar (dalam gram)\n" +
-                                                                    "- Calories (dalam kkal)\n" +
-                                                                    "- Fat (dalam gram)\n" +
-                                                                    "- Protein (dalam gram)\n" +
-                                                                    "\n" +
-                                                                    "3. Jika suatu nilai tidak dapat ditemukan, gunakan 0 sebagai default.\n" +
-                                                                    "\n" +
-                                                                    "4. Lakukan analisis kesehatan singkat berdasarkan nilai nutrisi yang ditemukan. Pertimbangkan:\n" +
-                                                                    "- Apakah kandungan gula terlalu tinggi?\n" +
-                                                                    "- Keseimbangan nutrisi protein, lemak, dan kalori\n" +
-                                                                    "- Potensi dampak kesehatan dari komposisi nutrisi\n" +
-                                                                    "\n" +
-                                                                    "5. Kembalikan output HANYA dalam format String JSON berikut:\n" +
-                                                                    "{\n" +
-                                                                    "    \"analysis\": \"Analisis kesehatan dalam 1-2 kalimat\",\n" +
-                                                                    "    \"sugar\": float,\n" +
-                                                                    "    \"calories\": float,\n" +
-                                                                    "    \"fat\": float, \n" +
-                                                                    "    \"protein\": float\n" +
-                                                                    "}" +
-                                                                    "6. Kembalikan JSON hanya dalam format string tanpa markdown"
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        )
-
-                                        productViewModel.generateContent(request)
-                                            .observe(this@CameraActivity) { result ->
-                                                when (result) {
-                                                    is Result.Loading -> {
-                                                        showLoading(true)
-                                                    }
-
-                                                    is Result.Success -> {
-                                                        showLoading(false)
-                                                        showToast(
-                                                            this@CameraActivity,
-                                                            result.data.candidates.first().content.parts.first().text
-                                                        )
-                                                        Log.d(
-                                                            "GEMINI_RESULT",
-                                                            result.data.candidates.first().content.parts.first().text
-                                                        )
-                                                    }
-
-                                                    is Result.Error -> {
-                                                        showLoading(false)
-                                                        result.error.getContentIfNotHandled()
-                                                            .let { toastText ->
-                                                                showToast(
-                                                                    this@CameraActivity,
-                                                                    toastText.toString()
-                                                                )
-                                                            }
-                                                    }
-                                                }
-                                            }
+                                        nutritionData = detectedText
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
                                     }
@@ -258,17 +191,7 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
-                                        compositionData = detectedText
-
-                                        // TODO( Change this with analysis result)
-                                        val inputString =
-                                            "0.0, 1.0, 1.1, 10.0" // Contoh input gula, lemak, protein, kalori
-                                        val inputValues =
-                                            inputString.split(",").map { it.trim().toFloat() }
-                                                .toFloatArray()
-                                        healthRecommendationHelper.predict(inputValues)
-                                        bottomSheetBehavior.state =
-                                            BottomSheetBehavior.STATE_HALF_EXPANDED
+                                        setGeminiGenerationResponse(nutritionData!!, detectedText)
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
                                     }
@@ -327,6 +250,8 @@ class CameraActivity : AppCompatActivity() {
                 summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
 
                 setAnalysisResult(summary!!, result)
+                bottomSheetBehavior.state =
+                    BottomSheetBehavior.STATE_EXPANDED
             },
             onError = { msg ->
                 showToast(this@CameraActivity, msg)
@@ -489,24 +414,27 @@ class CameraActivity : AppCompatActivity() {
 
         dialogSaveProductBinding.btnSave.setOnClickListener {
             val productName = dialogSaveProductBinding.edtProductName.text.toString()
+            var request: ProductSaveRequest
+            geminiGenerationResponse.let {
+                request = ProductSaveRequest(
+                    gradesId = getGradeId(analysisGrade!!)!!,
+                    name = productName,
+                    calories = summary!!.calories,
+                    caloriesIng = it?.caloriesIng!!,
+                    protein = summary!!.protein,
+                    proteinIng = it.proteinIng,
+                    fat = summary!!.fat,
+                    fatIng = it.fatIng,
+                    fiber = "2 g",
+                    fiberIng = "oats, flaxseed",
+                    carbo = "20 g",
+                    carboIng = "wheat, rice",
+                    sugar = summary!!.sugar,
+                    sugarIng = it.sugarIng,
+                    allergy = listOf()
+                )
 
-            val request = ProductSaveRequest(
-                gradesId = getGradeId(analysisGrade!!)!!,
-                name = productName,
-                calories = summary!!.calories,
-                caloriesIng = "sugar, flour",
-                protein = summary!!.protein,
-                proteinIng = "soy, milk",
-                fat = summary!!.fat,
-                fatIng = "butter, cream",
-                fiber = "2 g",
-                fiberIng = "oats, flaxseed",
-                carbo = "20 g",
-                carboIng = "wheat, rice",
-                sugar = summary!!.sugar,
-                sugarIng = "sucrose, honey",
-                allergy = listOf()
-            )
+            }
 
             productViewModel.saveProduct(request).observe(this) { result ->
                 when (result) {
@@ -531,6 +459,81 @@ class CameraActivity : AppCompatActivity() {
         }
 
         dialog.show()
+    }
+
+    private fun setGeminiGenerationResponse(nutritionalData: String, compositionData: String) {
+        val request = GeminiRequest(
+            listOf(
+                Contents(
+                    listOf(
+                        Part(
+                            "Nutritional Fact: $nutritionalData Composition: $compositionData" + getString(
+                                R.string.gemini_prompt
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        productViewModel.generateContent(request)
+            .observe(this@CameraActivity) { result ->
+                when (result) {
+                    is Result.Loading -> {
+                        showLoading(true)
+                    }
+
+                    is Result.Success -> {
+                        showLoading(false)
+                        val response =
+                            result.data.candidates.first().content.parts.first().text.trimIndent()
+
+                        val jsonRegex =
+                            """json\n(\{.*?\})""".toRegex(
+                                RegexOption.DOT_MATCHES_ALL
+                            )
+
+                        val match = jsonRegex.find(response)
+                        val jsonString = match?.groupValues?.get(1)
+
+                        Log.d(
+                            "GEMINI_RESULT",
+                            jsonString!!
+                        )
+
+                        geminiGenerationResponse = Gson().fromJson(
+                            jsonString,
+                            GeminiGenerationResponse::class.java
+                        )
+
+                        val inputValues =
+                            floatArrayOf(
+                                geminiGenerationResponse?.sugar?.toFloat()!!,
+                                geminiGenerationResponse?.fat?.toFloat()!!,
+                                geminiGenerationResponse?.protein?.toFloat()!!,
+                                geminiGenerationResponse?.calories?.toFloat()!!
+                            )
+
+                        Log.d(
+                            "HEALTH_REC_INPUT",
+                            inputValues.joinToString()
+                        )
+                        floatArrayOf()
+                        healthRecommendationHelper.predict(floatArrayOf(100f, 200f, 0f, 300f))
+                    }
+
+                    is Result.Error -> {
+                        showLoading(false)
+                        result.error.getContentIfNotHandled()
+                            .let { toastText ->
+                                showToast(
+                                    this@CameraActivity,
+                                    toastText.toString()
+                                )
+                            }
+                    }
+                }
+            }
     }
 
     private fun showLoading(isLoading: Boolean) {
