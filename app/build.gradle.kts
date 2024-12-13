@@ -1,8 +1,11 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("androidx.navigation.safeargs")
     id("com.google.devtools.ksp")
+    id("kotlin-parcelize")
 }
 
 android {
@@ -19,7 +22,20 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    val properties = Properties()
+    properties.load(project.rootProject.file("local.properties").reader())
+
     buildTypes {
+        debug {
+            buildConfigField("String", "FITS_API_URL", properties.getProperty("FITS_API_URL"))
+            buildConfigField("String", "GEMINI_API", properties.getProperty("GEMINI_API"))
+            buildConfigField(
+                "String",
+                "GEMINI_TOKEN_KEY",
+                properties.getProperty("GEMINI_TOKEN_KEY")
+            )
+            buildConfigField("String", "LLM_API_URL", properties.getProperty("LLM_API_URL"))
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -32,6 +48,7 @@ android {
     buildFeatures {
         viewBinding = true
         mlModelBinding = true
+        buildConfig = true
     }
 
     compileOptions {
@@ -91,4 +108,15 @@ dependencies {
 
     // ml kit
     implementation(libs.text.recognition)
+
+    // data store
+    implementation(libs.androidx.datastore.preferences)
+
+    // navigation
+    implementation(libs.androidx.navigation.fragment.ktx.v284)
+    implementation(libs.androidx.navigation.ui.ktx.v284)
+
+    // flexbox manager
+    implementation(libs.flexbox)
+
 }

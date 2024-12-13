@@ -1,22 +1,56 @@
 package com.nudriin.fits.data.dto.product
 
 import com.google.gson.annotations.SerializedName
-import com.nudriin.fits.data.domain.Grade
 
 data class ProductGetAllResponse(
-
-    @field:SerializedName("userproducts")
-    val userproducts: List<UserproductsItem>,
-
     @field:SerializedName("success")
     val success: Boolean,
+
+    @field:SerializedName("userHistory")
+    val userHistory: List<UserHistoryItem>,
 
     @field:SerializedName("message")
     val message: String
 )
 
-data class Product(
+data class ProductAllergy(
+    val allergen: String,
+    val id: Int,
+    val type: String,
+    val allergyName: String,
+    val jsonMemberClass: String,
+    val group: String
+)
 
+data class UserHistoryItem(
+    @field:SerializedName("product")
+    val product: Product,
+
+    @field:SerializedName("product_id")
+    val productId: String,
+
+    @field:SerializedName("created_at")
+    val createdAt: String,
+
+    @field:SerializedName("users_id")
+    val usersId: String,
+
+    @field:SerializedName("id")
+    val id: String
+)
+
+data class Grade(
+    @field:SerializedName("grade_desc")
+    val gradeDesc: String,
+
+    @field:SerializedName("id")
+    val id: Int,
+
+    @field:SerializedName("grade_name")
+    val gradeName: String
+)
+
+data class Product(
     @field:SerializedName("fiber_ing")
     val fiberIng: String,
 
@@ -25,6 +59,12 @@ data class Product(
 
     @field:SerializedName("fiber")
     val fiber: String,
+
+    @field:SerializedName("product_allergen")
+    val productAllergen: List<Any>,
+
+    @field:SerializedName("grades_id")
+    val gradesId: Int,
 
     @field:SerializedName("calories")
     val calories: String,
@@ -35,14 +75,14 @@ data class Product(
     @field:SerializedName("protein_ing")
     val proteinIng: String,
 
-    @field:SerializedName("grade")
-    val grade: Grade,
-
     @field:SerializedName("protein")
     val protein: String,
 
     @field:SerializedName("carbo_ing")
     val carboIng: String,
+
+    @field:SerializedName("grade")
+    val grade: Grade,
 
     @field:SerializedName("name")
     val name: String,
@@ -60,23 +100,11 @@ data class Product(
     val sugarIng: String,
 
     @field:SerializedName("sugar")
-    val sugar: String
-)
+    val sugar: String,
 
-data class UserproductsItem(
+    @field:SerializedName("overall")
+    val overall: String,
 
-    @field:SerializedName("product")
-    val product: Product,
-
-    @field:SerializedName("product_id")
-    val productId: String,
-
-    @field:SerializedName("created_at")
-    val createdAt: String,
-
-    @field:SerializedName("users_id")
-    val usersId: String,
-
-    @field:SerializedName("id")
-    val id: String
+    @field:SerializedName("health_assessment")
+    val healthAssessment: String,
 )

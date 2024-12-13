@@ -26,7 +26,9 @@ data class UsersAllergyItem(
     val allergy: Allergy,
 
     @field:SerializedName("id")
-    val id: String
+    val id: String,
+
+    var isSelected: Boolean = false
 )
 
 data class UserItem(
