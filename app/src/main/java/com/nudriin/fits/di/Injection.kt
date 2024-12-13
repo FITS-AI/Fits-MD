@@ -38,6 +38,12 @@ object Injection {
         val userPreference = UserPreference.getInstance(context.dataStore)
         val apiService = ApiConfig.getApiService()
         val geminiApiService = ApiConfig.getGeminiApiService()
-        return ProductRepository.getInstance(userPreference, apiService, geminiApiService)
+        val llmApiService = ApiConfig.getLlmApiService()
+        return ProductRepository.getInstance(
+            userPreference,
+            apiService,
+            geminiApiService,
+            llmApiService
+        )
     }
 }

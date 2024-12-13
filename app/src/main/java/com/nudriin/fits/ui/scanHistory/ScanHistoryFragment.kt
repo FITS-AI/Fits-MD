@@ -94,9 +94,19 @@ class ScanHistoryFragment : Fragment() {
                 sugar: HealthAnalysis,
                 fat: HealthAnalysis,
                 protein: HealthAnalysis,
-                calories: HealthAnalysis
+                calories: HealthAnalysis,
+                assessment: String
             ) {
-                moveToScanHistoryDetail(label, name, overall, sugar, fat, protein, calories)
+                moveToScanHistoryDetail(
+                    label,
+                    name,
+                    overall,
+                    sugar,
+                    fat,
+                    protein,
+                    calories,
+                    assessment
+                )
             }
 
         })
@@ -109,11 +119,12 @@ class ScanHistoryFragment : Fragment() {
         sugar: HealthAnalysis,
         fat: HealthAnalysis,
         protein: HealthAnalysis,
-        calories: HealthAnalysis
+        calories: HealthAnalysis,
+        assessment: String
     ) {
         val toDetail =
             ScanHistoryFragmentDirections.actionScanHistoryFragmentToScanHistoryDetailFragment(
-                label, name, overall, sugar, fat, protein, calories
+                label, name, overall, sugar, fat, protein, calories, assessment
             )
 
         Navigation.findNavController(binding.root).navigate(toDetail)

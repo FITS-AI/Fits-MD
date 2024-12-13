@@ -21,14 +21,18 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.core.text.HtmlCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.gson.Gson
@@ -38,17 +42,25 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import com.nudriin.fits.R
 import com.nudriin.fits.adapter.AnalysisAdapter
+import com.nudriin.fits.adapter.SavedAllergyAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
+import com.nudriin.fits.data.dto.allergy.AllergyContainedItem
+import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.dto.gemini.Contents
 import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
 import com.nudriin.fits.data.dto.gemini.GeminiRequest
 import com.nudriin.fits.data.dto.gemini.Part
+import com.nudriin.fits.data.dto.llm.LlmRequest
+import com.nudriin.fits.data.dto.llm.LlmResponse
+import com.nudriin.fits.data.dto.product.AllergyItem
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.databinding.DialogCapturedImgBinding
 import com.nudriin.fits.databinding.DialogEditTextBinding
+import com.nudriin.fits.ui.allergy.AllergyViewModel
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
 import com.nudriin.fits.utils.HealthRecommendationHelper
 import com.nudriin.fits.utils.OcrHelper
@@ -61,11 +73,13 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.Executors
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private lateinit var dialogBinding: DialogCameraBinding
     private lateinit var dialogSaveProductBinding: DialogEditTextBinding
+    private lateinit var dialogPreviewBinding: DialogCapturedImgBinding
     private var imageCapture: ImageCapture? = null
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
@@ -74,7 +88,8 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
     private var snapState = 1
     private var nutritionData: String? = null
-    private var geminiGenerationResponse: GeminiGenerationResponse? = null
+    private var improveGeneration: GeminiGenerationResponse? = null
+    private var llmResponse: LlmResponse? = null
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
     private val appSettingsViewModel: AppSettingsViewModel by viewModels {
         ViewModelFactory.getInstance(this)
@@ -82,11 +97,21 @@ class CameraActivity : AppCompatActivity() {
     private val productViewModel: ProductViewModel by viewModels {
         ViewModelFactory.getInstance(this)
     }
+    private val allergyViewModel: AllergyViewModel by viewModels {
+        ViewModelFactory.getInstance(this)
+    }
     private var summary: HealthRecommendationSummary? = null
     private var analysisGrade: String? = null
     private lateinit var ocrHelper: OcrHelper
+    private lateinit var ocrRealtimeHelper: OcrHelper
 
     private lateinit var bitmapImage: Bitmap
+    private var ocrImageResult: Bitmap? = null
+    private var detectedAllergy: String? = null
+    private var allergyContained: List<AllergyContainedItem>? = null
+    private var dialog: Dialog? = null
+    private var savedDialog: Dialog? = null
+    private var previewDialog: Dialog? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,6 +120,7 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         dialogBinding = DialogCameraBinding.inflate(layoutInflater)
         dialogSaveProductBinding = DialogEditTextBinding.inflate(layoutInflater)
+        dialogPreviewBinding = DialogCapturedImgBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -108,19 +134,62 @@ class CameraActivity : AppCompatActivity() {
 
     public override fun onResume() {
         super.onResume()
+        startCamera()
     }
 
 
     private fun startCamera() {
+        ocrRealtimeHelper = OcrHelper(
+            context = this@CameraActivity,
+            detectorListener = object : OcrHelper.DetectorListener {
+                override fun onError(error: String) {
+                    runOnUiThread {
+                        Log.d("CameraOCRError", error)
+                        showToast(this@CameraActivity, error)
+                    }
+                }
+
+                override fun onResults(
+                    results: FloatArray,
+                    imageHeight: Int,
+                    imageWidth: Int,
+                    boundingImg: Bitmap?
+                ) {
+                    runOnUiThread {
+                        Log.d("REALTIME_OCR_RES", results.joinToString())
+                        if (results.isNotEmpty() && results.size == 4) {
+                            binding.realtimeOverlay.updateBoundingBox(
+                                results,
+                                imageWidth,
+                                imageHeight
+                            )
+                        } else {
+                            binding.realtimeOverlay.clear()
+                        }
+                    }
+                }
+
+            }
+        )
+
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
 
         cameraProviderFuture.addListener({
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-            val preview = Preview.Builder()
+            val resolutionSelector = ResolutionSelector.Builder()
+                .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
                 .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
+
+
+            val imageAnalyzer = ImageAnalysis.Builder()
+                .setResolutionSelector(resolutionSelector)
+                .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+                .build()
+
+            imageAnalyzer.setAnalyzer(Executors.newSingleThreadExecutor()) { image ->
+                ocrRealtimeHelper.detectRealtimeObject(image)
+                image.close()
+            }
 
             imageCapture = ImageCapture.Builder()
                 .setTargetRotation(Surface.ROTATION_0)
@@ -128,9 +197,16 @@ class CameraActivity : AppCompatActivity() {
                 .build()
 
             try {
+                val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+                val preview = Preview.Builder()
+                    .build()
+                    .also {
+                        it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                    }
+
                 cameraProvider.unbindAll()
                 camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
+                    this, cameraSelector, preview, imageCapture, imageAnalyzer
                 )
             } catch (exc: Exception) {
                 showToast(this, "Failed to open camera.")
@@ -139,6 +215,7 @@ class CameraActivity : AppCompatActivity() {
         }, ContextCompat.getMainExecutor(this))
     }
 
+    @Suppress("DEPRECATION")
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
@@ -156,17 +233,24 @@ class CameraActivity : AppCompatActivity() {
                         1 -> {
                             val croppedUri = cropImage(output.savedUri!!)
                             bitmapImage =
-                                MediaStore.Images.Media.getBitmap(contentResolver, croppedUri)
+                                MediaStore.Images.Media.getBitmap(contentResolver, output.savedUri)
                             ocrHelper.detectObject(bitmapImage)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
-                            val inputImage: InputImage =
+                            val inputImage: InputImage = if (ocrImageResult != null) {
+                                InputImage.fromBitmap(ocrImageResult!!, Surface.ROTATION_0)
+                            } else {
                                 InputImage.fromFilePath(this@CameraActivity, croppedUri)
+                            }
 
                             textRecognizer.process(inputImage)
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
+                                        showToast(
+                                            this@CameraActivity,
+                                            "Success get nutritional data"
+                                        )
                                         nutritionData = detectedText
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
@@ -178,10 +262,8 @@ class CameraActivity : AppCompatActivity() {
                                     showToast(this@CameraActivity, "An error occurred!")
                                 }
                             snapState = 2
-                            val title = getString(R.string.instruction, "Two")
-                            val message = getString(R.string.composition_instruction)
-                            showDialog(title, message)
                             showLoading(false)
+                            binding.realtimeOverlay.visibility = View.GONE
                         }
 
                         2 -> {
@@ -195,6 +277,10 @@ class CameraActivity : AppCompatActivity() {
                                 .addOnSuccessListener { visionText: Text ->
                                     val detectedText: String = visionText.text
                                     if (detectedText.isNotBlank()) {
+                                        showToast(
+                                            this@CameraActivity,
+                                            "Success get composition data"
+                                        )
                                         setGeminiGenerationResponse(nutritionData!!, detectedText)
                                     } else {
                                         showToast(this@CameraActivity, "An error occurred!")
@@ -229,8 +315,6 @@ class CameraActivity : AppCompatActivity() {
         }
         supportActionBar?.hide()
 
-        startCamera()
-
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheet)
 
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
@@ -241,7 +325,7 @@ class CameraActivity : AppCompatActivity() {
 
         healthRecommendationHelper = HealthRecommendationHelper(
             context = this,
-            onResult = { result ->
+            onResult = { _, result ->
                 var isDiabetes = false
                 appSettingsViewModel.getSettings().observe(
                     this@CameraActivity
@@ -249,11 +333,19 @@ class CameraActivity : AppCompatActivity() {
                     isDiabetes = settings.diabetes
                 }
 
-                analysisGrade = result
+                analysisGrade = improveGeneration!!.grade
 
-                summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
+                summary =
+                    healthRecommendationHelper.recommendationSummary(
+                        analysisGrade ?: "",
+                        isDiabetes,
+                        improveGeneration!!.sugar,
+                        improveGeneration!!.fat,
+                        improveGeneration!!.protein,
+                        improveGeneration!!.calories
+                    )
 
-                setAnalysisResult(summary!!, result)
+                setAnalysisResult(summary!!, analysisGrade)
                 bottomSheetBehavior.state =
                     BottomSheetBehavior.STATE_EXPANDED
             },
@@ -284,13 +376,13 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onResults(
                     results: FloatArray,
-                    inferenceTime: Long,
                     imageHeight: Int,
                     imageWidth: Int,
                     boundingImg: Bitmap?
                 ) {
                     runOnUiThread {
                         Log.d("OCR_CAMERA_RES", results.joinToString())
+                        showPreviewDialog(boundingImg!!)
                     }
                 }
 
@@ -347,6 +439,16 @@ class CameraActivity : AppCompatActivity() {
         summary: HealthRecommendationSummary,
         analysisResult: String? = null
     ) {
+
+        val sugarIng =
+            resources.getString(R.string.content_ing, improveGeneration?.sugarIng ?: "")
+        val fatIng =
+            resources.getString(R.string.content_ing, improveGeneration?.fatIng ?: "")
+        val proteinIng =
+            resources.getString(R.string.content_ing, improveGeneration?.proteinIng ?: "")
+        val caloriesIng =
+            resources.getString(R.string.content_ing, improveGeneration?.caloriesIng ?: "")
+
         binding.tvGradeLabel.text = analysisResult ?: "!"
         binding.tvGradeBottomSheet.text = summary.grade
         binding.tvOverallBottomSheet.text = summary.overall
@@ -359,10 +461,28 @@ class CameraActivity : AppCompatActivity() {
         val layoutManager = LinearLayoutManager(this)
         binding.rvAnalysisResult.layoutManager = layoutManager
 
-        val sugar = HealthAnalysis("Sugar", summary.sugar)
-        val fat = HealthAnalysis("Fat", summary.fat)
-        val protein = HealthAnalysis("Protein", summary.protein)
-        val calories = HealthAnalysis("Calories", summary.calories)
+        val sugar = HealthAnalysis(
+            "Sugar ${improveGeneration?.sugar ?: ""}",
+            summary.sugar,
+            sugarIng
+        )
+        val fat = HealthAnalysis(
+            "Fat ${improveGeneration?.fat ?: ""}",
+            summary.fat,
+            fatIng
+        )
+        val protein =
+            HealthAnalysis(
+                "Protein ${improveGeneration?.protein ?: ""}",
+                summary.protein,
+                proteinIng
+            )
+        val calories =
+            HealthAnalysis(
+                "Calories ${improveGeneration?.calories ?: ""}",
+                summary.calories,
+                caloriesIng
+            )
 
         val analysisList = listOf<HealthAnalysis>(sugar, fat, protein, calories)
 
@@ -371,7 +491,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun showDialog(title: String, message: String) {
-        val dialog = Dialog(this, R.style.CustomDialogTheme)
+        dialog = Dialog(this, R.style.CustomDialogTheme)
 
         if (dialogBinding.root.parent != null) {
             (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
@@ -382,59 +502,64 @@ class CameraActivity : AppCompatActivity() {
             message,
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
-        dialog.setContentView(dialogBinding.root)
-        dialog.setCanceledOnTouchOutside(false)
+        dialog?.setContentView(dialogBinding.root)
+        dialog?.setCanceledOnTouchOutside(false)
 
         dialogBinding.btnUnderstand.setOnClickListener {
-            dialog.cancel()
+            dialog?.cancel()
         }
 
         appSettingsViewModel.getSettings().observe(
             this
         ) { settings ->
             if (settings.instruction) {
-                dialog.show()
+                dialog?.show()
             } else {
-                dialog.hide()
+                dialog?.hide()
             }
         }
 
     }
 
     private fun showSaveProductDialog() {
-        val dialog = Dialog(this, R.style.CustomDialogTheme)
+        savedDialog = Dialog(this, R.style.CustomDialogTheme)
 
-        if (dialogBinding.root.parent != null) {
-            (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
+        if (dialogSaveProductBinding.root.parent != null) {
+            (dialogSaveProductBinding.root.parent as ViewGroup).removeView(dialogSaveProductBinding.root)
         }
 
-        dialog.setContentView(dialogSaveProductBinding.root)
-        dialog.setCanceledOnTouchOutside(false)
+        savedDialog?.setContentView(dialogSaveProductBinding.root)
+        savedDialog?.setCanceledOnTouchOutside(false)
 
         dialogSaveProductBinding.btnClose.setOnClickListener {
-            dialog.cancel()
+            savedDialog?.cancel()
         }
 
         dialogSaveProductBinding.btnSave.setOnClickListener {
             val productName = dialogSaveProductBinding.edtProductName.text.toString()
             var request: ProductSaveRequest
-            geminiGenerationResponse.let {
+            val allergyRequest = allergyContained?.map {
+                AllergyItem(it.id)
+            } ?: listOf()
+            improveGeneration.let {
                 request = ProductSaveRequest(
                     gradesId = getGradeId(analysisGrade!!)!!,
                     name = productName,
                     calories = summary!!.calories,
-                    caloriesIng = it?.caloriesIng!!,
+                    caloriesIng = improveGeneration?.caloriesIng ?: "0.0",
                     protein = summary!!.protein,
-                    proteinIng = it.proteinIng,
+                    proteinIng = improveGeneration?.proteinIng ?: "0.0",
                     fat = summary!!.fat,
-                    fatIng = it.fatIng,
-                    fiber = "2 g",
+                    fatIng = improveGeneration?.fatIng ?: "0.0",
+                    fiber = "5 g",
                     fiberIng = "oats, flaxseed",
                     carbo = "20 g",
                     carboIng = "wheat, rice",
                     sugar = summary!!.sugar,
-                    sugarIng = it.sugarIng,
-                    allergy = listOf()
+                    sugarIng = improveGeneration?.sugarIng ?: "0.0",
+                    allergy = allergyRequest,
+                    overall = "${summary!!.overall} ${summary?.warning ?: ""}",
+                    healthAssessment = llmResponse?.data!!
                 )
 
             }
@@ -461,7 +586,44 @@ class CameraActivity : AppCompatActivity() {
             }
         }
 
-        dialog.show()
+        savedDialog?.show()
+    }
+
+    private fun showPreviewDialog(image: Bitmap) {
+        previewDialog = Dialog(this, R.style.CustomDialogTheme)
+
+        if (dialogPreviewBinding.root.parent != null) {
+            (dialogPreviewBinding.root.parent as ViewGroup).removeView(dialogPreviewBinding.root)
+        }
+
+        previewDialog?.setContentView(dialogPreviewBinding.root)
+        previewDialog?.setCanceledOnTouchOutside(false)
+
+        dialogPreviewBinding.ivPreview.setImageBitmap(image)
+
+        dialogPreviewBinding.btnCancel.setOnClickListener {
+            previewDialog?.cancel()
+            recreate()
+        }
+
+        dialogPreviewBinding.btnProcess.setOnClickListener {
+            ocrImageResult = image
+            previewDialog?.dismiss()
+            val title = getString(R.string.instruction, "Two")
+            val message = getString(R.string.composition_instruction)
+            showDialog(title, message)
+        }
+
+        appSettingsViewModel.getSettings().observe(
+            this
+        ) { settings ->
+            if (settings.instruction) {
+                previewDialog?.show()
+            } else {
+                previewDialog?.hide()
+            }
+        }
+
     }
 
     private fun setGeminiGenerationResponse(nutritionalData: String, compositionData: String) {
@@ -504,25 +666,26 @@ class CameraActivity : AppCompatActivity() {
                             jsonString!!
                         )
 
-                        geminiGenerationResponse = Gson().fromJson(
+                        improveGeneration = Gson().fromJson(
                             jsonString,
                             GeminiGenerationResponse::class.java
                         )
 
                         val inputValues =
                             floatArrayOf(
-                                geminiGenerationResponse?.sugar?.toFloat()!!,
-                                geminiGenerationResponse?.fat?.toFloat()!!,
-                                geminiGenerationResponse?.protein?.toFloat()!!,
-                                geminiGenerationResponse?.calories?.toFloat()!!
+                                improveGeneration?.sugar?.toFloat()!!,
+                                improveGeneration?.fat?.toFloat()!!,
+                                improveGeneration?.protein?.toFloat()!!,
+                                improveGeneration?.calories?.toFloat()!!
                             )
 
                         Log.d(
                             "HEALTH_REC_INPUT",
                             inputValues.joinToString()
                         )
-                        floatArrayOf()
-                        healthRecommendationHelper.predict(floatArrayOf(100f, 200f, 0f, 300f))
+                        setLlmResponse(improveGeneration)
+                        healthRecommendationHelper.predict(inputValues)
+                        detectUserAllergy(improveGeneration)
                     }
 
                     is Result.Error -> {
@@ -537,6 +700,90 @@ class CameraActivity : AppCompatActivity() {
                     }
                 }
             }
+    }
+
+    private fun setLlmResponse(data: GeminiGenerationResponse?) {
+        if (data == null) {
+            return
+        }
+
+        val request = LlmRequest(
+            resources.getString(
+                R.string.llm_prompt,
+                data.calories,
+                data.fat,
+                data.sugar,
+                data.protein
+            )
+        )
+        productViewModel.generateLlm(request).observe(this) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                    binding.tvAssessmentBottomSheet.text = "Retrieving the data ..."
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    llmResponse = result.data
+                    binding.tvAssessmentBottomSheet.text = result.data.data
+                }
+
+                is Result.Error -> {
+                    showLoading(false)
+                    binding.tvAssessmentBottomSheet.text = "No data"
+                    result.error.getContentIfNotHandled().let { toastText ->
+                        showToast(this, toastText.toString())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun detectUserAllergy(data: GeminiGenerationResponse?) {
+        if (data == null) {
+            return
+        }
+
+        val ingredient = "${data.sugarIng} ${data.fatIng} ${data.proteinIng} ${data.caloriesIng}"
+        val input = ingredient
+            .replace(",", "")
+            .replace("No data", "")
+            .replace("\\s+".toRegex(), " ")
+            .trim()
+
+        allergyViewModel.detectAllergy(AllergyDetectRequest(input)).observe(this) { result ->
+            when (result) {
+                is Result.Loading -> {
+                    showLoading(true)
+                    binding.tvAllergenBottomSheet.text = "Retrieving the data ..."
+                }
+
+                is Result.Success -> {
+                    showLoading(false)
+                    result.data.allergyContained.map {
+                        detectedAllergy = it.allergen
+                    }
+
+                    allergyContained = result.data.allergyContained
+
+                    if (detectedAllergy == "") {
+                        detectedAllergy = "No allergy detected"
+                    }
+
+                    binding.tvAllergenBottomSheet.text = detectedAllergy ?: "No allergy detected"
+                }
+
+                is Result.Error -> {
+                    showLoading(false)
+                    binding.tvAllergenBottomSheet.text = "No allergy detected"
+                    result.error.getContentIfNotHandled().let { toastText ->
+                        showToast(this, toastText.toString())
+                    }
+                }
+            }
+        }
+
     }
 
     private fun showLoading(isLoading: Boolean) {
@@ -557,10 +804,20 @@ class CameraActivity : AppCompatActivity() {
         orientationEventListener.disable()
     }
 
+    override fun onPause() {
+        super.onPause()
+        dialog?.dismiss()
+        savedDialog?.dismiss()
+        previewDialog?.dismiss()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         healthRecommendationHelper.close()
         ocrHelper.close()
+        dialog?.dismiss()
+        savedDialog?.dismiss()
+        previewDialog?.dismiss()
     }
 
     companion object {

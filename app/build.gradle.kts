@@ -34,6 +34,7 @@ android {
                 "GEMINI_TOKEN_KEY",
                 properties.getProperty("GEMINI_TOKEN_KEY")
             )
+            buildConfigField("String", "LLM_API_URL", properties.getProperty("LLM_API_URL"))
         }
         release {
             isMinifyEnabled = false

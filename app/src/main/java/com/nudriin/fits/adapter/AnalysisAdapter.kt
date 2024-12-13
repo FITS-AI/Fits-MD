@@ -14,6 +14,7 @@ class AnalysisAdapter(
         fun bind(analysisItem: HealthAnalysis) {
             binding.tvAnalysisResultHeader.text = analysisItem.name
             binding.tvAnalysisResultDescription.text = analysisItem.description
+            binding.tvAnalysisResultContent.text = analysisItem.ingredient
         }
     }
 

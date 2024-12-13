@@ -4,13 +4,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
+import com.nudriin.fits.data.dto.allergy.AllergyItem
 import com.nudriin.fits.data.dto.user.UsersAllergyItem
 import com.nudriin.fits.databinding.AllergyChipBinding
 
 class SavedAllergyAdapter(
     private val allergyList: List<UsersAllergyItem>,
+    private val onSelectionChanged: (List<UsersAllergyItem>) -> Unit
 ) : RecyclerView.Adapter<SavedAllergyAdapter.SavedAllergyViewHolder>() {
 
+    val selectedAllergies = mutableListOf<UsersAllergyItem>()
 
     inner class SavedAllergyViewHolder(private val binding: AllergyChipBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -19,6 +22,16 @@ class SavedAllergyAdapter(
             chip.text = allergyItem.allergy.allergyName
             chip.isCheckable = true
             chip.isChecked = false
+
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                allergyItem.isSelected = isChecked
+                if (isChecked) {
+                    selectedAllergies.add(allergyItem)
+                } else {
+                    selectedAllergies.remove(allergyItem)
+                }
+                onSelectionChanged(selectedAllergies)
+            }
         }
 
 

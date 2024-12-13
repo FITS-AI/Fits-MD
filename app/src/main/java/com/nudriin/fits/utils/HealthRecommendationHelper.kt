@@ -17,7 +17,7 @@ import java.nio.channels.FileChannel
 class HealthRecommendationHelper(
     private val modelName: String = "model3.tflite",
     val context: Context,
-    private val onResult: (String) -> Unit,
+    private val onResult: (String, FloatArray) -> Unit,
     private val onError: (String) -> Unit
 ) {
     private var isGPUSupported: Boolean = false
@@ -58,7 +58,7 @@ class HealthRecommendationHelper(
                 3 -> "D"
                 else -> "Unknown"
             }
-            onResult(predictedLabel)
+            onResult(predictedLabel, input)
         } catch (e: Exception) {
             onError("TFLite interpreter not loaded")
             Log.e(TAG, e.message.toString())
@@ -109,9 +109,33 @@ class HealthRecommendationHelper(
         }
     }
 
+    fun classifyFood(input: FloatArray): String {
+        if (input.size != 4) {
+            throw IllegalArgumentException("Input must contain exactly 4 elements: Sugar, Fat, Protein, Calories")
+        }
+
+        val sugar = input[0]
+        val fat = input[1]
+        val protein = input[2]
+        val calories = input[3]
+
+        return when {
+            calories in 10.0..100.0 && fat in 0.0..5.0 && sugar in 0.0..3.0 && protein in 20.0..35.0 -> "A"
+            calories in 100.0..250.0 && fat in 5.0..10.0 && sugar in 3.0..10.0 && protein in 10.0..20.0 -> "B"
+            calories in 250.0..400.0 && fat in 10.0..20.0 && sugar in 10.0..20.0 && protein in 3.0..10.0 -> "C"
+            calories in 400.0..600.0 && fat in 20.0..50.0 && sugar in 20.0..50.0 && protein in 0.0..3.0 -> "D"
+            else -> "D"
+        }
+    }
+
+
     fun recommendationSummary(
         grade: String,
-        isDiabetes: Boolean = false
+        isDiabetes: Boolean = false,
+        sugar: String,
+        fat: String,
+        protein: String,
+        calories: String
     ): HealthRecommendationSummary {
         val healthRecommendationSummary: HealthRecommendationSummary
         when (grade) {
@@ -119,10 +143,10 @@ class HealthRecommendationHelper(
                 healthRecommendationSummary = HealthRecommendationSummary(
                     "Healthy Food",
                     "Excellent for health. This food is nutrient-dense and can help maintain weight and heart health",
-                    "Low (less than 5g per serving)",
-                    "Low (less than 5g per serving, with minimal saturated fat)",
-                    "High (more than 15g per serving)",
-                    "Moderate (200-300 calories per serving)",
+                    "Low (About ${sugar}g per serving)",
+                    "Low (About ${fat}g per serving, with minimal saturated fat)",
+                    "High (About ${protein}g per serving)",
+                    "Moderate (About ${calories} calories per serving)",
                     warning = if (isDiabetes) "Note: This food is suitable for individuals with diabetes due to its low sugar content." else ""
                 )
             }
@@ -131,10 +155,10 @@ class HealthRecommendationHelper(
                 healthRecommendationSummary = HealthRecommendationSummary(
                     "Good Food",
                     "Good for health. This food can be part of a balanced diet, although portion size and frequency of consumption should be monitored",
-                    "Moderate (5-10g per serving)",
-                    "Moderate (5-10g per serving, with controlled saturated fat)",
-                    "Moderate (10-15g per serving)",
-                    "Moderate (300-400 calories per serving)",
+                    "Moderate (About ${sugar}g per serving)",
+                    "Moderate (About ${fat}g per serving, with controlled saturated fat)",
+                    "Moderate (About ${protein}g per serving)",
+                    "Moderate (About ${calories} calories per serving)",
                     warning = if (isDiabetes) "Note: Individuals with diabetes should consume this food in moderation due to its moderate sugar content." else ""
                 )
             }
@@ -143,10 +167,10 @@ class HealthRecommendationHelper(
                 healthRecommendationSummary = HealthRecommendationSummary(
                     "Fair Food",
                     "Should be consumed with caution. This food can be an occasional choice, but it should not be a mainstay in daily diet",
-                    "High (10-20g per serving)",
-                    "High (10-20g per serving, with some saturated fat)",
-                    "Low (less than 10g per serving)",
-                    "High (400-600 calories per serving)",
+                    "High (About ${sugar}g per serving)",
+                    "High (About ${fat}g per serving, with some saturated fat)",
+                    "Low (About ${protein}g per serving)",
+                    "High (About ${calories} calories per serving)",
                     warning = if (isDiabetes) "Warning: This food contains high sugar levels and is not recommended for individuals with diabetes." else ""
                 )
             }
@@ -155,10 +179,10 @@ class HealthRecommendationHelper(
                 healthRecommendationSummary = HealthRecommendationSummary(
                     "Unhealthy Food",
                     "Not recommended for regular consumption. This food can contribute to health issues such as obesity, diabetes, and heart disease",
-                    "Very high (more than 20g per serving)",
-                    "Very high (more than 20g per serving, with high saturated fat)",
-                    "Very low (less than 5g per serving)",
-                    "Very high (more than 600 calories per serving)",
+                    "Very high (About ${sugar}g per serving)",
+                    "Very high (About ${fat}g per serving, with high saturated fat)",
+                    "Very low (About ${protein}g per serving)",
+                    "Very high (About ${calories} calories per serving)",
                     warning = if (isDiabetes) "Warning: This food is extremely high in sugar and is unsafe for individuals with diabetes." else ""
                 )
             }

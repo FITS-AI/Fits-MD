@@ -1,18 +1,25 @@
 package com.nudriin.fits.adapter
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.nudriin.fits.R
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.databinding.ProductDetailsCardBinding
 
-class ScanHistoryDetailAdapter(private val analysisList: List<HealthAnalysis>) :
+class ScanHistoryDetailAdapter(
+    private val context: Context,
+    private val analysisList: List<HealthAnalysis>
+) :
     RecyclerView.Adapter<ScanHistoryDetailAdapter.ViewHolder>() {
-    class ViewHolder(private val binding: ProductDetailsCardBinding) :
+    inner class ViewHolder(private val binding: ProductDetailsCardBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(analysis: HealthAnalysis) {
             binding.tvProductIngredientTitle.text = analysis.name
             binding.tvProductIngredientDescription.text = analysis.description
+            binding.tvProductIngredient.text =
+                context.resources.getString(R.string.content_ing, analysis.ingredient)
         }
     }
 

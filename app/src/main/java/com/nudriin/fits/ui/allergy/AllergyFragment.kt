@@ -16,6 +16,7 @@ import com.google.android.flexbox.JustifyContent
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.nudriin.fits.adapter.AllergyAdapter
 import com.nudriin.fits.adapter.SavedAllergyAdapter
+import com.nudriin.fits.data.dto.allergy.AllergyDeleteRequest
 import com.nudriin.fits.data.dto.allergy.AllergyItem
 import com.nudriin.fits.data.dto.user.UsersAllergyItem
 import com.nudriin.fits.databinding.FragmentAllergyBinding
@@ -115,7 +116,9 @@ class AllergyFragment : Fragment() {
 
                     is Result.Success -> {
                         savedAllergyAdapter =
-                            SavedAllergyAdapter(result.data.user.first().usersAllergy)
+                            SavedAllergyAdapter(result.data.user.first().usersAllergy) { selectedAllergies ->
+                                binding.btnDelete.isEnabled = selectedAllergies.isNotEmpty()
+                            }
                         binding.rvSavedAllergy.adapter = savedAllergyAdapter
                         bottomSheetBehavior.state =
                             BottomSheetBehavior.STATE_EXPANDED
@@ -169,6 +172,38 @@ class AllergyFragment : Fragment() {
                     }
                 }
             }
+        }
+
+        binding.btnDelete.setOnClickListener {
+            val selectedAllergies = savedAllergyAdapter.selectedAllergies
+            val allergyIds = selectedAllergies.map { it.allergyId }
+            allergyViewModel.deleteAllergy(AllergyDeleteRequest(allergyIds))
+                .observe(viewLifecycleOwner) { result ->
+                    when (result) {
+                        is Result.Loading -> {
+                            binding.btnDelete.isEnabled = false
+                            showLoading(true)
+                        }
+
+                        is Result.Success -> {
+                            showLoading(false)
+                            Log.d("AllergyFragmentDelete", result.data.toString())
+                            binding.btnDelete.isEnabled = true
+                            showToast(requireContext(), result.data.message)
+                            val toProfile =
+                                AllergyFragmentDirections.actionAllergyFragmentToProfileFragment()
+                            Navigation.findNavController(binding.root).navigate(toProfile)
+                        }
+
+                        is Result.Error -> {
+                            showLoading(false)
+                            binding.btnDelete.isEnabled = true
+                            result.error.getContentIfNotHandled().let { toastText ->
+                                showToast(requireContext(), toastText.toString())
+                            }
+                        }
+                    }
+                }
         }
     }
 

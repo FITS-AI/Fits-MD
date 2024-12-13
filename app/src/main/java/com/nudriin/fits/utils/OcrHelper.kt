@@ -1,191 +1,182 @@
 package com.nudriin.fits.utils
 
 import android.content.Context
+import android.content.res.AssetManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Rect
-import android.os.SystemClock
 import android.util.Log
-import com.nudriin.fits.ml.Ocr
-import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.common.ops.CastOp
-import org.tensorflow.lite.support.common.ops.NormalizeOp
-import org.tensorflow.lite.support.image.ImageProcessor
-import org.tensorflow.lite.support.image.TensorImage
-import org.tensorflow.lite.support.image.ops.ResizeOp
+import androidx.camera.core.ImageProxy
+import com.google.android.gms.tflite.gpu.GpuDelegate
+import org.tensorflow.lite.Interpreter
+import java.io.FileInputStream
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
 class OcrHelper(
     private val context: Context,
+    private val modelName: String = "opt_ocr.tflite",
     private val detectorListener: DetectorListener?
 ) {
-    private var model: Ocr? = null
+
+    private var interpreter: Interpreter? = null
 
     init {
-        try {
-            model = Ocr.newInstance(context)
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to initialize the model: ${e.message}")
-            detectorListener?.onError("Failed to initialize the model")
-        }
+        initInterpreter()
     }
 
     fun detectObject(image: Bitmap) {
-        if (model == null) {
+        if (interpreter == null) {
             detectorListener?.onError("Model is not initialized")
             return
         }
 
         try {
-            // Preprocess the image to match the model's expected input size
-            val tensorImage = preprocessImage(image)
 
-            // Record inference start time
-            var inferenceTime = SystemClock.uptimeMillis()
+            val resizedBitmap = Bitmap.createScaledBitmap(image, image.width, image.height, true)
+            val inputArray = preprocessImage(resizedBitmap)
 
-            val byteBuffer = tensorImage.buffer
+            val outputArray = Array(1) { FloatArray(4) }
 
-            // Run inference
-            val outputs = model!!.process(tensorImage.tensorBuffer)
-            inferenceTime = SystemClock.uptimeMillis() - inferenceTime
+            interpreter?.run(inputArray, outputArray)
 
-            // Extract results
-            val probabilities = outputs.outputFeature0AsTensorBuffer
-            val results = probabilities.floatArray
+            val boundingBox = outputArray[0]
+            val scaledBoundingBox = scaleBoundingBox(boundingBox, image.width, image.height)
 
-            // Get the original image dimensions
-            val originalWidth = image.width
-            val originalHeight = image.height
+            val resultBitmap = drawBoundingBox(image, scaledBoundingBox)
 
-            // Assuming the model's expected input size is stored in a variable
-            val modelInputWidth = 224
-            val modelInputHeight = 224
+            val croppedBitmap = cropImage(image, scaledBoundingBox)
 
-            // Check if scaling is necessary based on model input size
-            val needsScaling =
-                originalWidth != modelInputWidth || originalHeight != modelInputHeight
-
-            // Descale bounding boxes if necessary
-            val scaledResults = if (needsScaling) {
-                val scaleX = originalWidth.toFloat() / modelInputWidth.toFloat()
-                val scaleY = originalHeight.toFloat() / modelInputHeight.toFloat()
-                val scaledResults = FloatArray(results.size)
-                for (i in results.indices step 4) {
-                    scaledResults[i] = results[i] * scaleX  // Left X
-                    scaledResults[i + 1] = results[i + 1] * scaleY // Top Y
-                    scaledResults[i + 2] = results[i + 2] * scaleX // Right X
-                    scaledResults[i + 3] = results[i + 3] * scaleY // Bottom Y
-                }
-                scaledResults
-            } else {
-                results
-            }
-
-//            val boundingBox = denormalizedBoundingBox(
-//                results[1], results[2], results[3], results[4],
-//                image.width, image.height
-//            )
-
-            val bitmapImage = drawBoundingBoxes(image, scaledResults)
-
-            // Update the listener with the results, including the bounding box
             detectorListener?.onResults(
-                scaledResults,
-                inferenceTime,
+                scaledBoundingBox,
                 image.height,
                 image.width,
-                bitmapImage
+                croppedBitmap
             )
 
-            Log.d(TAG, "Results: ${results.joinToString()}")
-            Log.d(TAG, "Results: $results")
         } catch (e: Exception) {
             Log.e(TAG, "Error during inference: ${e.message}")
             detectorListener?.onError("Error during inference")
         }
     }
 
-    private fun preprocessImage(image: Bitmap): TensorImage {
-        val detectionImageMeans =
-            floatArrayOf(103.94.toFloat(), 116.78.toFloat(), 123.68.toFloat())
-        val detectionImageStds = floatArrayOf(1.toFloat(), 1.toFloat(), 1.toFloat())
-        val imageProcessor = ImageProcessor.Builder()
-            .add(
-                ResizeOp(
-                    224,
-                    224,
-                    ResizeOp.ResizeMethod.BILINEAR
-                )
-            ) // Resize to match model input size
-            .add(NormalizeOp(detectionImageMeans, detectionImageStds))
-            .add(CastOp(DataType.FLOAT32))
-            .build()
+    fun detectRealtimeObject(image: ImageProxy) {
+        if (interpreter == null) {
+            detectorListener?.onError("Model is not initialized")
+            return
+        }
 
-        val tensorImage = TensorImage()
-        tensorImage.load(image)
-        return imageProcessor.process(tensorImage)
+        val resizedBitmap =
+            Bitmap.createScaledBitmap(image.toBitmap(), 224, 224, true)
+        val inputArray = preprocessImage(resizedBitmap)
+
+        val outputArray = Array(1) { FloatArray(4) }
+
+        interpreter?.run(inputArray, outputArray)
+
+        val boundingBox = outputArray[0]
+        val scaledBoundingBox = scaleBoundingBox(boundingBox, image.width, image.height)
+
+        val resultBitmap = drawBoundingBox(image.toBitmap(), scaledBoundingBox)
+
+        detectorListener?.onResults(
+            scaledBoundingBox,
+            image.height,
+            image.width,
+            resultBitmap
+        )
+    }
+
+    private fun initInterpreter() {
+        interpreter?.close()
+        val tfLiteOption = Interpreter.Options().setNumThreads(4)
+
+        try {
+            interpreter = Interpreter(loadModelFile(context.assets, modelName), tfLiteOption)
+        } catch (e: Exception) {
+            detectorListener?.onError(e.message.toString())
+            Log.e(TAG, e.message.toString())
+        }
+    }
+
+    private fun loadModelFile(assetManager: AssetManager, modelPath: String): MappedByteBuffer {
+        assetManager.openFd(modelPath).use { fileDecriptor ->
+            FileInputStream(fileDecriptor.fileDescriptor).use { inputStream ->
+                val fileChannel = inputStream.channel
+                val startOffset = fileDecriptor.startOffset
+                val declaredLength = fileDecriptor.declaredLength
+                return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+            }
+        }
+    }
+
+    private fun preprocessImage(bitmap: Bitmap): Array<Array<Array<FloatArray>>> {
+        val inputArray = Array(1) { Array(224) { Array(224) { FloatArray(3) } } }
+        for (y in 0 until 224) {
+            for (x in 0 until 224) {
+                val pixel = bitmap.getPixel(x, y)
+                inputArray[0][y][x][0] = Color.red(pixel) / 255.0f
+                inputArray[0][y][x][1] = Color.green(pixel) / 255.0f
+                inputArray[0][y][x][2] = Color.blue(pixel) / 255.0f
+            }
+        }
+        return inputArray
+    }
+
+    private fun scaleBoundingBox(
+        boundingBox: FloatArray,
+        originalWidth: Int,
+        originalHeight: Int,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f
+    ): FloatArray {
+        val yMin = boundingBox[0] * originalHeight + offsetY
+        val xMin = boundingBox[1] * originalWidth + offsetX
+        val yMax = boundingBox[2] * originalHeight + offsetY
+        val xMax = boundingBox[3] * originalWidth + offsetX
+        return floatArrayOf(yMin, xMin, yMax, xMax)
+    }
+
+    private fun drawBoundingBox(bitmap: Bitmap, boundingBox: FloatArray): Bitmap {
+        val resultBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
+        val canvas = Canvas(resultBitmap)
+        val paint = Paint()
+        paint.color = Color.RED
+        paint.style = Paint.Style.STROKE
+        paint.strokeWidth = 8f
+
+        val yMin = boundingBox[0].toInt()
+        val xMin = boundingBox[1].toInt()
+        val yMax = boundingBox[2].toInt()
+        val xMax = boundingBox[3].toInt()
+
+        canvas.drawRect(xMin.toFloat(), yMin.toFloat(), xMax.toFloat(), yMax.toFloat(), paint)
+        return resultBitmap
+    }
+
+    private fun cropImage(bitmap: Bitmap, boundingBox: FloatArray): Bitmap {
+        val yMin = boundingBox[0].toInt()
+        val xMin = boundingBox[1].toInt()
+        val yMax = boundingBox[2].toInt()
+        val xMax = boundingBox[3].toInt()
+
+        val cropX = xMin.coerceIn(0, bitmap.width)
+        val cropY = yMin.coerceIn(0, bitmap.height)
+        val cropWidth = (xMax - xMin).coerceIn(0, bitmap.width - cropX)
+        val cropHeight = (yMax - yMin).coerceIn(0, bitmap.height - cropY)
+
+        return Bitmap.createBitmap(bitmap, cropX, cropY, cropWidth, cropHeight)
     }
 
     fun close() {
-        model?.close()
-    }
-
-    private fun denormalizedBoundingBox(
-        xMin: Float, yMin: Float, xMax: Float, yMax: Float,
-        imageWidth: Int, imageHeight: Int
-    ): Rect {
-        return Rect(
-            (xMin * imageWidth).toInt(),
-            (yMin * imageHeight).toInt(),
-            (xMax * imageWidth).toInt(),
-            (yMax * imageHeight).toInt()
-        )
-    }
-
-    private fun drawBoundingBoxes(
-        bitmap: Bitmap,
-        results: FloatArray
-    ): Bitmap {
-        // Copy the original bitmap to create a mutable version
-        val mutableBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, true)
-        val canvas = Canvas(mutableBitmap)
-        val paint = Paint()
-//        var scaleFactors = max(width * 1f / imageWidth, height * 1f / imageHeight)
-
-        paint.style = Paint.Style.STROKE
-        paint.color = Color.RED
-        paint.strokeWidth = 8f
-
-
-        // Process the output results
-        val imageWidth = bitmap.width
-        val imageHeight = bitmap.height
-//        val scaleFactor = max(imageWidth * 1f / imageWidth, imageHeight * 1f / imageHeight)
-
-
-        val xMin = results[0] * imageWidth
-        val yMin = results[1] * imageHeight
-        val xMax = results[2] * imageWidth
-        val yMax = results[3] * imageHeight
-
-        // Draw bounding box
-        canvas.drawRect(
-            xMin,
-            yMin,
-            xMax,
-            yMax,
-            paint
-        )
-
-        return mutableBitmap
+        interpreter?.close()
     }
 
     interface DetectorListener {
         fun onError(error: String)
         fun onResults(
             results: FloatArray,
-            inferenceTime: Long,
             imageHeight: Int,
             imageWidth: Int,
             boundingImg: Bitmap? = null

@@ -100,5 +100,11 @@ data class Product(
     val sugarIng: String,
 
     @field:SerializedName("sugar")
-    val sugar: String
+    val sugar: String,
+
+    @field:SerializedName("overall")
+    val overall: String,
+
+    @field:SerializedName("health_assessment")
+    val healthAssessment: String,
 )
