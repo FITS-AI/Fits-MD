@@ -1,65 +1,79 @@
-# Fits (Food & Intake Tracking Scanner)
+# Fits Mobile App: Development Environment Setup
 
 <img src="https://raw.githubusercontent.com/nudriin/Fits/refs/heads/main/fits-dark.png" align="center">
 
-# Mobile Development Setup
+## Project Introduction
+This guide walks you through setting up the development environment for the Fits mobile application, which uses Android with Kotlin and Java technologies.
 
-This guide will help you set up your mobile development environment for Android using Kotlin and Java.
+## System Requirements
+Before diving in, make sure you have:
+- Latest version of [Android Studio](https://developer.android.com/studio)
+- [Java Development Kit](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+- [Android SDK](https://developer.android.com/studio#downloads)
+- Git version control system
 
-## Prerequisites
+## Installation Steps
 
-- [Android Studio](https://developer.android.com/studio) installed
-- [Java Development Kit (JDK)](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html) installed
-- [Android SDK](https://developer.android.com/studio#downloads) installed
-
-## Getting Started
-
-### 1. Clone the Repository
-
-```sh
+### Repository Setup
+Start by cloning the project repository:
+```bash
 git clone https://github.com/FITS-AI/Fits-MD
 cd Fits-MD
 ```
 
-### 2. Open the Project in Android Studio
+### Project Configuration
 
-1. Launch Android Studio.
-2. Select **Open an existing Android Studio project**.
-3. Navigate to the cloned repository and select it.
+#### Project Initialization
+1. Open Android Studio
+2. Choose **Open Existing Project**
+3. Select the cloned Fits-MD directory
 
-### 3. Configure Local Properties
-
-Create a `local.properties` file in the root directory of your project and add the following lines:
+#### Environment Configuration
+Create a `local.properties` file in the project root with these placeholders:
 
 ```ini
-sdk.dir=path_to_your_android_sdk
-API_URL="http://your_api_url/"
-LLM_API_URL="https://llm_api_url"
+# Android SDK location
+sdk.dir=/absolute/path/to/android/sdk
+
+# Backend API configurations
+API_URL="http://your_backend_endpoint/"
+LLM_API_URL="https://your_language_model_api/"
 GEMINI_API_URL="https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent/"
-GEMINI_API_KEY="your_gemini_api_key"
+GEMINI_API_KEY="your_generative_ai_key"
 ```
 
-Replace `path_to_your_android_sdk`, `your_maps_api_key`, `your_api_url`, and `your_gemini_api_key` with your actual values.
+### API Key Acquisition
 
-### 4. Obtain Gemini API Keys
+#### Gemini API Setup
+1. Access [Google Cloud Console](https://console.cloud.google.com/)
+2. Create or select a project
+3. Navigate to **Credentials** section
+4. Generate a new API key
+5. Enable Generative Language API
+6. Copy and securely store your key
 
-1. Go to the [Google Cloud Console](https://console.cloud.google.com/).
-2. Create a new project or select an existing project.
-3. Navigate to **APIs & Services** > **Credentials**.
-4. Click **Create credentials** and select **API key**.
-5. Enable the **Generative Language API** in the **Library** section.
-6. Copy the generated API key and add it to your `local.properties` file as `GEMINI_API_KEY`.
+### Dependency Management
+1. Open `build.gradle.kts`
+2. Verify dependency configurations
+3. Trigger Gradle synchronization
 
-#### API Keys
+### Application Launch
+- Connect an Android device or launch an emulator
+- Use Android Studio's **Run** button or `Shift + F10`
 
-Ensure your API keys are kept secure and not checked into version control. Use environment variables or a secure vault for production keys.
+## Security Recommendations
+- Avoid committing sensitive credentials to version control
+- Use environment variable management
+- Implement key rotation strategies
+- Minimize API key permissions
 
-### 5. Build the Project
+## Potential Troubleshooting
+- Cache invalidation
+- Rebuild project
+- Update development tools
+- Check network configurations
 
-1. Open the `build.gradle.kts` file and ensure all dependencies are correctly set up.
-2. Sync the project with Gradle files by clicking **Sync Now** in the notification bar.
-
-### 6. Run the Project
-
-1. Connect an Android device or start an emulator.
-2. Click the **Run** button in Android Studio or press `Shift + F10`.
+## Helpful Resources
+- [Android Official Documentation](https://developer.android.com/docs)
+- [Kotlin Language Guide](https://kotlinlang.org/docs/home.html)
+- [Gradle Build System](https://gradle.org/documentation/)
