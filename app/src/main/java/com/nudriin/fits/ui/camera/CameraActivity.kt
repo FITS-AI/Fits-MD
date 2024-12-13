@@ -46,6 +46,7 @@ import com.nudriin.fits.adapter.SavedAllergyAdapter
 import com.nudriin.fits.common.ProductViewModel
 import com.nudriin.fits.data.domain.HealthAnalysis
 import com.nudriin.fits.data.domain.HealthRecommendationSummary
+import com.nudriin.fits.data.dto.allergy.AllergyContainedItem
 import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.dto.gemini.Contents
 import com.nudriin.fits.data.dto.gemini.GeminiGenerationResponse
@@ -53,6 +54,7 @@ import com.nudriin.fits.data.dto.gemini.GeminiRequest
 import com.nudriin.fits.data.dto.gemini.Part
 import com.nudriin.fits.data.dto.llm.LlmRequest
 import com.nudriin.fits.data.dto.llm.LlmResponse
+import com.nudriin.fits.data.dto.product.AllergyItem
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
@@ -104,6 +106,9 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var bitmapImage: Bitmap
     private var ocrImageResult: Bitmap? = null
     private var detectedAllergy: String? = null
+    private var allergyContained: List<AllergyContainedItem>? = null
+    private var dialog: Dialog? = null
+    private var savedDialog: Dialog? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -477,7 +482,7 @@ class CameraActivity : AppCompatActivity() {
     }
 
     private fun showDialog(title: String, message: String) {
-        val dialog = Dialog(this, R.style.CustomDialogTheme)
+        dialog = Dialog(this, R.style.CustomDialogTheme)
 
         if (dialogBinding.root.parent != null) {
             (dialogBinding.root.parent as ViewGroup).removeView(dialogBinding.root)
@@ -488,42 +493,45 @@ class CameraActivity : AppCompatActivity() {
             message,
             HtmlCompat.FROM_HTML_MODE_LEGACY
         )
-        dialog.setContentView(dialogBinding.root)
-        dialog.setCanceledOnTouchOutside(false)
+        dialog?.setContentView(dialogBinding.root)
+        dialog?.setCanceledOnTouchOutside(false)
 
         dialogBinding.btnUnderstand.setOnClickListener {
-            dialog.cancel()
+            dialog?.cancel()
         }
 
         appSettingsViewModel.getSettings().observe(
             this
         ) { settings ->
             if (settings.instruction) {
-                dialog.show()
+                dialog?.show()
             } else {
-                dialog.hide()
+                dialog?.hide()
             }
         }
 
     }
 
     private fun showSaveProductDialog() {
-        val dialog = Dialog(this, R.style.CustomDialogTheme)
+        savedDialog = Dialog(this, R.style.CustomDialogTheme)
 
         if (dialogSaveProductBinding.root.parent != null) {
             (dialogSaveProductBinding.root.parent as ViewGroup).removeView(dialogSaveProductBinding.root)
         }
 
-        dialog.setContentView(dialogSaveProductBinding.root)
-        dialog.setCanceledOnTouchOutside(false)
+        savedDialog?.setContentView(dialogSaveProductBinding.root)
+        savedDialog?.setCanceledOnTouchOutside(false)
 
         dialogSaveProductBinding.btnClose.setOnClickListener {
-            dialog.cancel()
+            savedDialog?.cancel()
         }
 
         dialogSaveProductBinding.btnSave.setOnClickListener {
             val productName = dialogSaveProductBinding.edtProductName.text.toString()
             var request: ProductSaveRequest
+            val allergyRequest = allergyContained?.map {
+                AllergyItem(it.id)
+            } ?: listOf()
             geminiGenerationResponse.let {
                 request = ProductSaveRequest(
                     gradesId = getGradeId(analysisGrade!!)!!,
@@ -534,13 +542,15 @@ class CameraActivity : AppCompatActivity() {
                     proteinIng = geminiGenerationResponse?.proteinIng ?: "0.0",
                     fat = summary!!.fat,
                     fatIng = geminiGenerationResponse?.fatIng ?: "0.0",
-                    fiber = "2 g",
+                    fiber = "5 g",
                     fiberIng = "oats, flaxseed",
                     carbo = "20 g",
                     carboIng = "wheat, rice",
                     sugar = summary!!.sugar,
                     sugarIng = geminiGenerationResponse?.sugarIng ?: "0.0",
-                    allergy = listOf()
+                    allergy = allergyRequest,
+                    overall = "${summary!!.overall} ${summary?.warning ?: ""}",
+                    healthAssessment = llmResponse?.data!!
                 )
 
             }
@@ -567,7 +577,7 @@ class CameraActivity : AppCompatActivity() {
             }
         }
 
-        dialog.show()
+        savedDialog?.show()
     }
 
     private fun setGeminiGenerationResponse(nutritionalData: String, compositionData: String) {
@@ -709,6 +719,8 @@ class CameraActivity : AppCompatActivity() {
                         detectedAllergy = it.allergen
                     }
 
+                    allergyContained = result.data.allergyContained
+
                     if (detectedAllergy == "") {
                         detectedAllergy = "No allergy detected"
                     }
@@ -746,10 +758,18 @@ class CameraActivity : AppCompatActivity() {
         orientationEventListener.disable()
     }
 
+    override fun onPause() {
+        super.onPause()
+        dialog?.dismiss()
+        savedDialog?.dismiss()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         healthRecommendationHelper.close()
         ocrHelper.close()
+        dialog?.dismiss()
+        savedDialog?.dismiss()
     }
 
     companion object {
