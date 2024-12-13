@@ -3,10 +3,29 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="lime">#C7FF24</color>
+    <color name="limeDark">#A7CD36</color>
+    <color name="limeSecond">#D5ED8F</color>
+    <color name="blues">#2f5bf2</color>
     <color name="ash">#EAF0F8</color>
     <color name="dark">#1B1B1B</color>
     <color name="label_a">#00803D</color>
     <color name="label_b">#86BC26</color>
     <color name="label_c">#F7A832</color>
     <color name="label_d">#BC1717</color>
+    <color name="input_outline">
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:color="@color/lime" android:state_focused="true" />
+            <item android:color="@color/lime" android:state_hovered="true" />
+            <item android:color="@color/lime" android:state_enabled="false" />
+            <item android:color="@color/white" />
+        </selector>
+    </color>
+
+
+    <color name="chip_bg">
+        <selector xmlns:android="http://schemas.android.com/apk/res/android">
+            <item android:color="@color/design_default_color_primary" android:state_checked="true" />
+            <item android:color="@color/material_grey_300" />
+        </selector>
+    </color>
 </resources>

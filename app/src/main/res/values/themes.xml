@@ -2,8 +2,16 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.Fits" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
-        <item name="android:windowBackground">@color/ash</item>
+        <item name="colorPrimary">@color/limeDark</item>
+        <item name="colorOnPrimary">@color/dark</item>
+        <item name="colorSecondary">@color/lime</item>
+        <item name="colorOnSecondary">@color/dark</item>
+        <item name="colorTertiary">@color/blues</item>
+        <item name="colorOnTertiary">@color/white</item>
+        <item name="colorSurface">@color/ash</item>
+        <item name="colorOnBackground">@color/dark</item>
+
+        <!--        <item name="android:windowBackground">@color/ash</item>-->
     </style>
 
     <style name="Theme.Fits" parent="Base.Theme.Fits" />
@@ -11,4 +19,11 @@
     <style name="Button.Lime" parent="ThemeOverlay.AppCompat">
         <item name="android:background">@drawable/lime_btn_rounded</item>
     </style>
+
+    <style name="CustomDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+    </style>
+
 </resources>
