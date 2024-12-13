@@ -328,7 +328,7 @@ class CameraActivity : AppCompatActivity() {
 
         healthRecommendationHelper = HealthRecommendationHelper(
             context = this,
-            onResult = { result ->
+            onResult = { _, result ->
                 var isDiabetes = false
                 appSettingsViewModel.getSettings().observe(
                     this@CameraActivity
@@ -336,11 +336,15 @@ class CameraActivity : AppCompatActivity() {
                     isDiabetes = settings.diabetes
                 }
 
-                analysisGrade = result
+                analysisGrade = healthRecommendationHelper.classifyFood(result)
 
-                summary = healthRecommendationHelper.recommendationSummary(result, isDiabetes)
+                summary =
+                    healthRecommendationHelper.recommendationSummary(
+                        analysisGrade ?: "",
+                        isDiabetes
+                    )
 
-                setAnalysisResult(summary!!, result)
+                setAnalysisResult(summary!!, analysisGrade)
                 bottomSheetBehavior.state =
                     BottomSheetBehavior.STATE_EXPANDED
             },

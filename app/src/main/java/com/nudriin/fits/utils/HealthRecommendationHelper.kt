@@ -17,7 +17,7 @@ import java.nio.channels.FileChannel
 class HealthRecommendationHelper(
     private val modelName: String = "model3.tflite",
     val context: Context,
-    private val onResult: (String) -> Unit,
+    private val onResult: (String, FloatArray) -> Unit,
     private val onError: (String) -> Unit
 ) {
     private var isGPUSupported: Boolean = false
@@ -58,7 +58,7 @@ class HealthRecommendationHelper(
                 3 -> "D"
                 else -> "Unknown"
             }
-            onResult(predictedLabel)
+            onResult(predictedLabel, input)
         } catch (e: Exception) {
             onError("TFLite interpreter not loaded")
             Log.e(TAG, e.message.toString())
@@ -108,6 +108,25 @@ class HealthRecommendationHelper(
             }
         }
     }
+
+    fun classifyFood(input: FloatArray): String {
+        if (input.size != 4) {
+            throw IllegalArgumentException("Input must contain exactly 4 elements: Sugar, Fat, Protein, Calories")
+        }
+
+        val sugar = input[0]
+        val fat = input[1]
+        val protein = input[2]
+        val calories = input[3]
+
+        return when {
+            sugar < 5 && fat < 5 && protein > 15 && calories in 200.0..300.0 -> "A"
+            sugar in 5.0..10.0 && fat in 5.0..10.0 && protein in 10.0..15.0 && calories in 300.0..400.0 -> "B"
+            sugar in 10.0..20.0 && fat in 10.0..20.0 && protein <= 10 && calories in 400.0..600.0 -> "C"
+            else -> "D"
+        }
+    }
+
 
     fun recommendationSummary(
         grade: String,
