@@ -3,6 +3,8 @@ package com.nudriin.fits.ui.camera
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.net.Uri
 import androidx.camera.core.Camera
 import android.os.Build
@@ -231,10 +233,12 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     when (snapState) {
                         1 -> {
-                            val croppedUri = cropImage(output.savedUri!!)
                             bitmapImage =
                                 MediaStore.Images.Media.getBitmap(contentResolver, output.savedUri)
-                            ocrHelper.detectObject(bitmapImage)
+                            val rotation = getExifRotation(output.savedUri!!, this@CameraActivity)
+                            val rotatedBitmap = rotateBitmap(bitmapImage, rotation.toFloat())
+                            val croppedUri = cropImage(output.savedUri!!)
+                            ocrHelper.detectObject(rotatedBitmap)
                             val textRecognizer =
                                 TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
                             val inputImage: InputImage = if (ocrImageResult != null) {
@@ -862,4 +866,25 @@ class CameraActivity : AppCompatActivity() {
 
         return Uri.fromFile(croppedFile)
     }
+
+    fun rotateBitmap(source: Bitmap, rotation: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(rotation)
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+    }
+
+    fun getExifRotation(imageUri: Uri, context: Context): Int {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val exif = ExifInterface(inputStream!!)
+        return when (exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
+    }
+
 }
