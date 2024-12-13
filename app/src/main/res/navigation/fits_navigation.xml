@@ -95,6 +95,9 @@
         <argument
             android:name="calories"
             app:argType="com.nudriin.fits.data.domain.HealthAnalysis" />
+        <argument
+            android:name="assessment"
+            app:argType="string" />
     </fragment>
     <fragment
         android:id="@+id/profileFragment"
