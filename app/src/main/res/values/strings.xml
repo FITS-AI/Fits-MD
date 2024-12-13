@@ -35,6 +35,7 @@
     <string name="save_allergy">Save</string>
     <string name="health_preferences_message">Select the food details that matter most to you, such as allergen information, to rank foods based on your preferences, view the most relevant details first, and receive a summary of compatibility with your health needs.</string>
     <string name="allergens">Add Allergens</string>
+    <string name="allergen_text">Allergens</string>
     <string name="instruction">Step %s</string>
     <string name="nutrition_table_instruction">Please capture a clear photo of the <b>nutrition facts table</b> on the product, ensuring all information is visible and well-focused.</string>
     <string name="composition_instruction">Please capture a clear photo of the product <b>composition</b> section, ensuring all text is legible and well-focused.</string>
@@ -70,15 +71,22 @@
                                                                     5. Kembalikan output HANYA dalam format String JSON berikut:
                                                                     {
                                                                         analysis: Analisis kesehatan dalam 1-2 kalimat,
+                                                                        grade: grade analisis kesehatan rentang A - D
                                                                         sugar: float,
-                                                                        sugar_ing: bahan - bahan yang mengandung gula (sugar, flour)
+                                                                        sugar_ing: bahan - bahan yang mengandung gula (sugar, flour) string sebagai "No data" default
                                                                         calories: float,
-                                                                        calories_ing: bahan - bahan yang mengandung kalori (sugar, flour)
+                                                                        calories_ing: bahan - bahan yang mengandung kalori (sugar, flour) string sebagai "No data" default
                                                                         fat: float,
-                                                                        fat_ing: bahan - bahan yang mengandung lemak (butter, cream)
+                                                                        fat_ing: bahan - bahan yang mengandung lemak (butter, cream) string sebagai "No data" default
                                                                         protein: float,
-                                                                        protein_ing:  bahan - bahan yang mengandung protein (soy, milk)
+                                                                        protein_ing:  bahan - bahan yang mengandung protein (soy, milk) string sebagai "No data" default
                                                                     }
                                                                     6. Kembalikan JSON hanya dalam format string tanpa markdown
                                                                     7. Berikan jawaban dalam bahasa inggris</string>
+
+    <string name="llm_prompt">What health benefits does this product offer? health_assessment The product contains %s calories, %sg of fat, 23g of carbohydrates, 5g fiber, %sg of sugar, and %sg of protein.</string>
+    <string name="health_assessment">Health Assessment</string>
+    <string name="content_ing">Ingredient: %s</string>
+    <string name="ok">OK</string>
+    <string name="preview">Preview</string>
 </resources>

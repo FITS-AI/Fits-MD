@@ -37,11 +37,14 @@ class ScanHistoryDetailFragment : Fragment() {
 
         val label = historyData.label
         val name = historyData.name
-        val override = historyData.overall
+        val overall = historyData.overall
         val sugar = historyData.sugar
         val fat = historyData.fat
         val protein = historyData.protein
         val calories = historyData.calories
+        val assessment = historyData.assessment.ifEmpty {
+            "No health assessment"
+        }
 
         analysisData = listOf(sugar, fat, protein, calories)
 
@@ -51,9 +54,10 @@ class ScanHistoryDetailFragment : Fragment() {
         binding.tvLabel.text = label
         binding.tvProductTitle.text = name
         binding.layoutOverall.tvProductIngredientTitle.text = "Overall"
-        binding.layoutOverall.tvProductIngredientDescription.text = override
+        binding.layoutOverall.tvProductIngredientDescription.text = overall
+        binding.layoutOverall.tvAssessmentProduct.text = assessment
 
-        val adapter = ScanHistoryDetailAdapter(analysisData)
+        val adapter = ScanHistoryDetailAdapter(requireContext(), analysisData)
         binding.rvAnalysisResult.adapter = adapter
     }
 

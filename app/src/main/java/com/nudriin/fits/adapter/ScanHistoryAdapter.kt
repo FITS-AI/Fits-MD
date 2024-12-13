@@ -20,7 +20,8 @@ class ScanHistoryAdapter(private val scanHistoryList: List<UserHistoryItem>) :
             sugar: HealthAnalysis,
             fat: HealthAnalysis,
             protein: HealthAnalysis,
-            calories: HealthAnalysis
+            calories: HealthAnalysis,
+            assessment: String,
         )
     }
 
@@ -33,7 +34,7 @@ class ScanHistoryAdapter(private val scanHistoryList: List<UserHistoryItem>) :
 
         fun bind(scanHistory: UserHistoryItem) {
             binding.tvScanHistoryTitle.text = scanHistory.product.name
-            binding.tvScanHistoryDescription.text = scanHistory.product.grade.gradeDesc
+            binding.tvScanHistoryDescription.text = scanHistory.product.overall
             binding.tvScanHistoryLabel.text = scanHistory.product.grade.gradeName
         }
 
@@ -54,11 +55,24 @@ class ScanHistoryAdapter(private val scanHistoryList: List<UserHistoryItem>) :
             onItemClickCallback.onItemClicked(
                 label = scanHistory.product.grade.gradeName,
                 name = scanHistory.product.name,
-                overall = scanHistory.product.grade.gradeDesc,
-                sugar = HealthAnalysis("Sugar", scanHistory.product.sugar),
-                fat = HealthAnalysis("Sugar", scanHistory.product.fat),
-                protein = HealthAnalysis("Sugar", scanHistory.product.protein),
-                calories = HealthAnalysis("Sugar", scanHistory.product.calories)
+                overall = scanHistory.product.overall,
+                sugar = HealthAnalysis(
+                    "Sugar",
+                    scanHistory.product.sugar,
+                    scanHistory.product.sugarIng
+                ),
+                fat = HealthAnalysis("Fat", scanHistory.product.fat, scanHistory.product.fatIng),
+                protein = HealthAnalysis(
+                    "Protein",
+                    scanHistory.product.protein,
+                    scanHistory.product.proteinIng
+                ),
+                calories = HealthAnalysis(
+                    "Calories",
+                    scanHistory.product.calories,
+                    scanHistory.product.caloriesIng
+                ),
+                assessment = scanHistory.product.healthAssessment
             )
         }
     }

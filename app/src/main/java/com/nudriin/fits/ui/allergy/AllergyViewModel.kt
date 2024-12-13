@@ -1,6 +1,8 @@
 package com.nudriin.fits.ui.allergy
 
 import androidx.lifecycle.ViewModel
+import com.nudriin.fits.data.dto.allergy.AllergyDeleteRequest
+import com.nudriin.fits.data.dto.allergy.AllergyDetectRequest
 import com.nudriin.fits.data.repository.AllergyRepository
 
 class AllergyViewModel(
@@ -11,4 +13,8 @@ class AllergyViewModel(
     fun saveUserAllergy(request: List<Int>) = allergyRepository.saveUserAllergy(request)
 
     fun getAllergyByUserId() = allergyRepository.getAllergyByUserId()
+
+    fun detectAllergy(request: AllergyDetectRequest) = allergyRepository.detectAllergy(request)
+
+    fun deleteAllergy(request: AllergyDeleteRequest) = allergyRepository.deleteAllergy(request)
 }
