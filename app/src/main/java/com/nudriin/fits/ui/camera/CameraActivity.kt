@@ -88,7 +88,7 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<FrameLayout>
     private var snapState = 1
     private var nutritionData: String? = null
-    private var geminiGenerationResponse: GeminiGenerationResponse? = null
+    private var improveGeneration: GeminiGenerationResponse? = null
     private var llmResponse: LlmResponse? = null
     private lateinit var healthRecommendationHelper: HealthRecommendationHelper
     private val appSettingsViewModel: AppSettingsViewModel by viewModels {
@@ -262,9 +262,6 @@ class CameraActivity : AppCompatActivity() {
                                     showToast(this@CameraActivity, "An error occurred!")
                                 }
                             snapState = 2
-                            val title = getString(R.string.instruction, "Two")
-                            val message = getString(R.string.composition_instruction)
-                            showDialog(title, message)
                             showLoading(false)
                             binding.realtimeOverlay.visibility = View.GONE
                         }
@@ -336,12 +333,16 @@ class CameraActivity : AppCompatActivity() {
                     isDiabetes = settings.diabetes
                 }
 
-                analysisGrade = healthRecommendationHelper.classifyFood(result)
+                analysisGrade = improveGeneration!!.grade
 
                 summary =
                     healthRecommendationHelper.recommendationSummary(
                         analysisGrade ?: "",
-                        isDiabetes
+                        isDiabetes,
+                        improveGeneration!!.sugar,
+                        improveGeneration!!.fat,
+                        improveGeneration!!.protein,
+                        improveGeneration!!.calories
                     )
 
                 setAnalysisResult(summary!!, analysisGrade)
@@ -440,13 +441,13 @@ class CameraActivity : AppCompatActivity() {
     ) {
 
         val sugarIng =
-            resources.getString(R.string.content_ing, geminiGenerationResponse?.sugarIng ?: "")
+            resources.getString(R.string.content_ing, improveGeneration?.sugarIng ?: "")
         val fatIng =
-            resources.getString(R.string.content_ing, geminiGenerationResponse?.fatIng ?: "")
+            resources.getString(R.string.content_ing, improveGeneration?.fatIng ?: "")
         val proteinIng =
-            resources.getString(R.string.content_ing, geminiGenerationResponse?.proteinIng ?: "")
+            resources.getString(R.string.content_ing, improveGeneration?.proteinIng ?: "")
         val caloriesIng =
-            resources.getString(R.string.content_ing, geminiGenerationResponse?.caloriesIng ?: "")
+            resources.getString(R.string.content_ing, improveGeneration?.caloriesIng ?: "")
 
         binding.tvGradeLabel.text = analysisResult ?: "!"
         binding.tvGradeBottomSheet.text = summary.grade
@@ -461,24 +462,24 @@ class CameraActivity : AppCompatActivity() {
         binding.rvAnalysisResult.layoutManager = layoutManager
 
         val sugar = HealthAnalysis(
-            "Sugar ${geminiGenerationResponse?.sugar ?: ""}",
+            "Sugar ${improveGeneration?.sugar ?: ""}",
             summary.sugar,
             sugarIng
         )
         val fat = HealthAnalysis(
-            "Fat ${geminiGenerationResponse?.fat ?: ""}",
+            "Fat ${improveGeneration?.fat ?: ""}",
             summary.fat,
             fatIng
         )
         val protein =
             HealthAnalysis(
-                "Protein ${geminiGenerationResponse?.protein ?: ""}",
+                "Protein ${improveGeneration?.protein ?: ""}",
                 summary.protein,
                 proteinIng
             )
         val calories =
             HealthAnalysis(
-                "Calories ${geminiGenerationResponse?.calories ?: ""}",
+                "Calories ${improveGeneration?.calories ?: ""}",
                 summary.calories,
                 caloriesIng
             )
@@ -540,22 +541,22 @@ class CameraActivity : AppCompatActivity() {
             val allergyRequest = allergyContained?.map {
                 AllergyItem(it.id)
             } ?: listOf()
-            geminiGenerationResponse.let {
+            improveGeneration.let {
                 request = ProductSaveRequest(
                     gradesId = getGradeId(analysisGrade!!)!!,
                     name = productName,
                     calories = summary!!.calories,
-                    caloriesIng = geminiGenerationResponse?.caloriesIng ?: "0.0",
+                    caloriesIng = improveGeneration?.caloriesIng ?: "0.0",
                     protein = summary!!.protein,
-                    proteinIng = geminiGenerationResponse?.proteinIng ?: "0.0",
+                    proteinIng = improveGeneration?.proteinIng ?: "0.0",
                     fat = summary!!.fat,
-                    fatIng = geminiGenerationResponse?.fatIng ?: "0.0",
+                    fatIng = improveGeneration?.fatIng ?: "0.0",
                     fiber = "5 g",
                     fiberIng = "oats, flaxseed",
                     carbo = "20 g",
                     carboIng = "wheat, rice",
                     sugar = summary!!.sugar,
-                    sugarIng = geminiGenerationResponse?.sugarIng ?: "0.0",
+                    sugarIng = improveGeneration?.sugarIng ?: "0.0",
                     allergy = allergyRequest,
                     overall = "${summary!!.overall} ${summary?.warning ?: ""}",
                     healthAssessment = llmResponse?.data!!
@@ -608,6 +609,9 @@ class CameraActivity : AppCompatActivity() {
         dialogPreviewBinding.btnProcess.setOnClickListener {
             ocrImageResult = image
             previewDialog?.dismiss()
+            val title = getString(R.string.instruction, "Two")
+            val message = getString(R.string.composition_instruction)
+            showDialog(title, message)
         }
 
         appSettingsViewModel.getSettings().observe(
@@ -662,26 +666,26 @@ class CameraActivity : AppCompatActivity() {
                             jsonString!!
                         )
 
-                        geminiGenerationResponse = Gson().fromJson(
+                        improveGeneration = Gson().fromJson(
                             jsonString,
                             GeminiGenerationResponse::class.java
                         )
 
                         val inputValues =
                             floatArrayOf(
-                                geminiGenerationResponse?.sugar?.toFloat()!!,
-                                geminiGenerationResponse?.fat?.toFloat()!!,
-                                geminiGenerationResponse?.protein?.toFloat()!!,
-                                geminiGenerationResponse?.calories?.toFloat()!!
+                                improveGeneration?.sugar?.toFloat()!!,
+                                improveGeneration?.fat?.toFloat()!!,
+                                improveGeneration?.protein?.toFloat()!!,
+                                improveGeneration?.calories?.toFloat()!!
                             )
 
                         Log.d(
                             "HEALTH_REC_INPUT",
                             inputValues.joinToString()
                         )
-                        setLlmResponse(geminiGenerationResponse)
+                        setLlmResponse(improveGeneration)
                         healthRecommendationHelper.predict(inputValues)
-                        detectUserAllergy(geminiGenerationResponse)
+                        detectUserAllergy(improveGeneration)
                     }
 
                     is Result.Error -> {

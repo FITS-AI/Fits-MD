@@ -6,6 +6,9 @@ data class GeminiGenerationResponse(
     @field:SerializedName("analysis")
     val analysis: String,
 
+    @field:SerializedName("grade")
+    val grade: String,
+
     @field:SerializedName("sugar")
     val sugar: String,
 

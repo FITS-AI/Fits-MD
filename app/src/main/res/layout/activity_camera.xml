@@ -103,7 +103,7 @@
         android:background="@drawable/white_bg_rounded"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         app:behavior_hideable="true"
-        app:behavior_peekHeight="1000dp">
+        app:behavior_peekHeight="0dp">
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"

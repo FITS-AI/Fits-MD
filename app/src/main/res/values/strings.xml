@@ -71,6 +71,7 @@
                                                                     5. Kembalikan output HANYA dalam format String JSON berikut:
                                                                     {
                                                                         analysis: Analisis kesehatan dalam 1-2 kalimat,
+                                                                        grade: grade analisis kesehatan rentang A - D
                                                                         sugar: float,
                                                                         sugar_ing: bahan - bahan yang mengandung gula (sugar, flour) string sebagai "No data" default
                                                                         calories: float,
