@@ -58,6 +58,7 @@ import com.nudriin.fits.data.dto.product.AllergyItem
 import com.nudriin.fits.data.dto.product.ProductSaveRequest
 import com.nudriin.fits.databinding.ActivityCameraBinding
 import com.nudriin.fits.databinding.DialogCameraBinding
+import com.nudriin.fits.databinding.DialogCapturedImgBinding
 import com.nudriin.fits.databinding.DialogEditTextBinding
 import com.nudriin.fits.ui.allergy.AllergyViewModel
 import com.nudriin.fits.ui.appSettings.AppSettingsViewModel
@@ -78,6 +79,7 @@ class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
     private lateinit var dialogBinding: DialogCameraBinding
     private lateinit var dialogSaveProductBinding: DialogEditTextBinding
+    private lateinit var dialogPreviewBinding: DialogCapturedImgBinding
     private var imageCapture: ImageCapture? = null
     private var cameraSelector: CameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
     private var flashMode: Int = ImageCapture.FLASH_MODE_OFF
@@ -109,6 +111,7 @@ class CameraActivity : AppCompatActivity() {
     private var allergyContained: List<AllergyContainedItem>? = null
     private var dialog: Dialog? = null
     private var savedDialog: Dialog? = null
+    private var previewDialog: Dialog? = null
 
     private val timeStamp: String = SimpleDateFormat(FILENAME_FORMAT, Locale.US).format(Date())
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,6 +120,7 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         dialogBinding = DialogCameraBinding.inflate(layoutInflater)
         dialogSaveProductBinding = DialogEditTextBinding.inflate(layoutInflater)
+        dialogPreviewBinding = DialogCapturedImgBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -373,7 +377,7 @@ class CameraActivity : AppCompatActivity() {
                 ) {
                     runOnUiThread {
                         Log.d("OCR_CAMERA_RES", results.joinToString())
-                        ocrImageResult = boundingImg
+                        showPreviewDialog(boundingImg!!)
                     }
                 }
 
@@ -580,6 +584,40 @@ class CameraActivity : AppCompatActivity() {
         savedDialog?.show()
     }
 
+    private fun showPreviewDialog(image: Bitmap) {
+        previewDialog = Dialog(this, R.style.CustomDialogTheme)
+
+        if (dialogPreviewBinding.root.parent != null) {
+            (dialogPreviewBinding.root.parent as ViewGroup).removeView(dialogPreviewBinding.root)
+        }
+
+        previewDialog?.setContentView(dialogPreviewBinding.root)
+        previewDialog?.setCanceledOnTouchOutside(false)
+
+        dialogPreviewBinding.ivPreview.setImageBitmap(image)
+
+        dialogPreviewBinding.btnCancel.setOnClickListener {
+            previewDialog?.cancel()
+            recreate()
+        }
+
+        dialogPreviewBinding.btnProcess.setOnClickListener {
+            ocrImageResult = image
+            previewDialog?.dismiss()
+        }
+
+        appSettingsViewModel.getSettings().observe(
+            this
+        ) { settings ->
+            if (settings.instruction) {
+                previewDialog?.show()
+            } else {
+                previewDialog?.hide()
+            }
+        }
+
+    }
+
     private fun setGeminiGenerationResponse(nutritionalData: String, compositionData: String) {
         val request = GeminiRequest(
             listOf(
@@ -762,6 +800,7 @@ class CameraActivity : AppCompatActivity() {
         super.onPause()
         dialog?.dismiss()
         savedDialog?.dismiss()
+        previewDialog?.dismiss()
     }
 
     override fun onDestroy() {
@@ -770,6 +809,7 @@ class CameraActivity : AppCompatActivity() {
         ocrHelper.close()
         dialog?.dismiss()
         savedDialog?.dismiss()
+        previewDialog?.dismiss()
     }
 
     companion object {

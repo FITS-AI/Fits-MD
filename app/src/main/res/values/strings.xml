@@ -86,4 +86,6 @@
     <string name="llm_prompt">What health benefits does this product offer? health_assessment The product contains %s calories, %sg of fat, 23g of carbohydrates, 5g fiber, %sg of sugar, and %sg of protein.</string>
     <string name="health_assessment">Health Assessment</string>
     <string name="content_ing">Ingredient: %s</string>
+    <string name="ok">OK</string>
+    <string name="preview">Preview</string>
 </resources>
